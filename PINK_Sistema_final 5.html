@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PINK Paper Club — Sistema de Gestão</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+
+  :root {
+    --pink: #E91E8C;
+    --pink-light: #FCE4F3;
+    --pink-pale: #FDF0FA;
+    --navy: #1A1A2E;
+    --navy-mid: #2D2D44;
+    --gray: #6B7280;
+    --gray-light: #F4F4F6;
+    --white: #FFFFFF;
+    --green: #059669;
+    --green-light: #ECFDF5;
+    --red: #DC2626;
+    --red-light: #FEF2F2;
+    --yellow: #D97706;
+    --yellow-light: #FFFBEB;
+    --border: #E5E7EB;
+    --font-display: 'DM Serif Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-body); background: var(--gray-light); color: var(--navy); min-height: 100vh; }
+
+  /* HEADER */
+  .header {
+    background: var(--navy);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  .logo { font-family: var(--font-display); color: var(--white); font-size: 22px; letter-spacing: 0.5px; }
+  .logo span { color: var(--pink); }
+  .nav { display: flex; gap: 4px; }
+  .nav-btn {
+    background: none; border: none; color: #9CA3AF; font-family: var(--font-body);
+    font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 8px;
+    cursor: pointer; transition: all 0.2s; letter-spacing: 0.3px;
+  }
+  .nav-btn:hover { color: var(--white); background: rgba(255,255,255,0.08); }
+  .nav-btn.active { color: var(--white); background: var(--pink); }
+  .header-meta { color: #6B7280; font-size: 12px; }
+
+  /* MAIN */
+  .main { max-width: 1400px; margin: 0 auto; padding: 32px 24px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* PAGE TITLE */
+  .page-title { font-family: var(--font-display); font-size: 28px; color: var(--navy); margin-bottom: 4px; }
+  .page-sub { color: var(--gray); font-size: 14px; margin-bottom: 28px; }
+
+  /* GRID */
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+
+  /* CARDS */
+  .card {
+    background: var(--white); border-radius: 16px; padding: 24px;
+    border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .card-label { font-size: 11px; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .card-value { font-size: 28px; font-weight: 600; color: var(--navy); line-height: 1; }
+  .card-value.green { color: var(--green); }
+  .card-value.red { color: var(--red); }
+  .card-value.pink { color: var(--pink); }
+  .card-sub { font-size: 12px; color: var(--gray); margin-top: 6px; }
+  .card-accent { width: 3px; height: 32px; border-radius: 2px; float: right; margin-top: -8px; }
+
+  /* KPI CARD SPECIAL */
+  .kpi-card {
+    background: var(--white); border-radius: 16px; padding: 20px 24px;
+    border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    position: relative; overflow: hidden;
+  }
+  .kpi-card::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%; border-radius: 16px 0 0 16px;
+  }
+  .kpi-card.pink-accent::before { background: var(--pink); }
+  .kpi-card.green-accent::before { background: var(--green); }
+  .kpi-card.red-accent::before { background: var(--red); }
+  .kpi-card.yellow-accent::before { background: var(--yellow); }
+  .kpi-card.navy-accent::before { background: var(--navy); }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 13px; font-weight: 600; color: var(--gray);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    margin-bottom: 16px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* TABLE */
+  .table-wrap { background: var(--white); border-radius: 16px; border: 1px solid var(--border); overflow-x: auto; margin-bottom: 24px; }
+  .table-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .table-title { font-size: 15px; font-weight: 600; color: var(--navy); }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: var(--gray-light); padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 0.6px; border-bottom: 1px solid var(--border); }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--pink-pale); }
+  tbody td { padding: 10px 12px; font-size: 13px; color: var(--navy); vertical-align: top; word-break: break-word; }
+
+  /* BADGES */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-red { background: var(--red-light); color: var(--red); }
+  .badge-yellow { background: var(--yellow-light); color: var(--yellow); }
+  .badge-pink { background: var(--pink-light); color: var(--pink); }
+  .badge-gray { background: var(--gray-light); color: var(--gray); }
+  .badge-navy { background: #EEF2FF; color: var(--navy); }
+
+  /* BUTTONS */
+  .btn { padding: 8px 16px; border-radius: 10px; font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; }
+  .btn-primary { background: var(--pink); color: white; }
+  .btn-primary:hover { background: #C2187A; }
+  .btn-outline { background: white; color: var(--navy); border: 1px solid var(--border); }
+  .btn-outline:hover { background: var(--gray-light); }
+  .btn-sm { padding: 5px 10px; font-size: 11px; border-radius: 7px; }
+
+  /* FORM ELEMENTS */
+  input, select, textarea {
+    font-family: var(--font-body); font-size: 13px; color: var(--navy);
+    border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px;
+    outline: none; transition: border 0.2s; background: white; width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--pink); box-shadow: 0 0 0 3px rgba(233,30,140,0.08); }
+  label { font-size: 12px; font-weight: 600; color: var(--gray); display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-group { margin-bottom: 16px; }
+  .form-row { display: grid; gap: 12px; margin-bottom: 0; }
+  .form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .form-row.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: white; border-radius: 20px; padding: 32px; width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal-title { font-family: var(--font-display); font-size: 22px; margin-bottom: 20px; color: var(--navy); }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+
+  /* ALERT */
+  .alert { padding: 12px 16px; border-radius: 12px; font-size: 13px; margin-bottom: 20px; display: flex; gap: 10px; align-items: flex-start; }
+  .alert-warn { background: var(--yellow-light); color: #92400E; border: 1px solid #FDE68A; }
+  .alert-danger { background: var(--red-light); color: #991B1B; border: 1px solid #FECACA; }
+  .alert-info { background: var(--pink-light); color: #9D174D; border: 1px solid #FBCFE8; }
+
+  /* PROGRESS BAR */
+  .progress-bar { height: 8px; background: var(--gray-light); border-radius: 4px; overflow: hidden; margin-top: 8px; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+
+  /* DIVISÃO CARD */
+  .divisao-card { background: var(--pink-pale); border: 2px solid var(--pink-light); border-radius: 16px; padding: 24px; text-align: center; }
+  .divisao-name { font-size: 13px; font-weight: 600; color: var(--gray); margin-bottom: 4px; }
+  .divisao-value { font-size: 32px; font-weight: 600; color: var(--pink); }
+  .divisao-pct { font-size: 13px; color: var(--gray); }
+
+  /* FILTERS */
+  .filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .filter-chip { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--gray); transition: all 0.2s; }
+  .filter-chip.active { border-color: var(--pink); background: var(--pink); color: white; }
+  .filter-chip:hover:not(.active) { border-color: var(--pink); color: var(--pink); }
+  .search-input { flex: 1; min-width: 200px; padding: 7px 12px; border-radius: 20px; border: 1.5px solid var(--border); font-size: 13px; max-width: 280px; }
+
+  /* EMPTY STATE */
+  .empty { text-align: center; padding: 48px; color: var(--gray); }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-text { font-size: 14px; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+  /* DASHBOARD CHART BARS */
+  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; padding: 0 4px; }
+  .bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .bar { width: 100%; border-radius: 6px 6px 0 0; min-height: 4px; transition: height 0.5s ease; }
+  .bar-label { font-size: 10px; color: var(--gray); font-weight: 500; white-space: nowrap; }
+  .bar-val { font-size: 10px; color: var(--gray); font-weight: 600; }
+
+  /* EDITABLE CELL */
+  .editable { cursor: pointer; padding: 3px 6px; border-radius: 6px; transition: background 0.15s; }
+  .editable:hover { background: var(--pink-light); }
+
+  /* ESTOQUE STATUS */
+  .stock-ok { color: var(--green); font-weight: 600; }
+  .stock-low { color: var(--yellow); font-weight: 600; }
+  .stock-zero { color: var(--red); font-weight: 600; }
+  .row-roberta { background: #FEF3C7 !important; }
+  .row-agnes   { background: #EEF2FF !important; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">PINK <span>Paper Club</span></div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
+    <button class="nav-btn" onclick="showSection('financeiro')">Financeiro</button>
+    <button class="nav-btn" onclick="showSection('pedidos')">Pedidos</button>
+    <button class="nav-btn" onclick="showSection('estoque')">Estoque</button>
+    <button class="nav-btn" onclick="showSection('catalogo')">Catálogo</button>
+  </nav>
+  <div class="header-meta">Jun–Ago 2026</div>
+</header>
+
+<main class="main">
+
+<!-- ============ DASHBOARD ============ -->
+<div class="section active" id="dashboard">
+  <div class="page-title">Dashboard</div>
+  <div class="page-sub">Visão geral do período Jun–Ago 2026</div>
+
+  <div class="grid-4">
+    <div class="kpi-card pink-accent">
+      <div class="card-label">Receita Total</div>
+      <div class="card-value pink" id="d-receita">R$0</div>
+      <div class="card-sub">Jun–Ago 2026</div>
+    </div>
+    <div class="kpi-card green-accent">
+      <div class="card-label">Lucro Líquido</div>
+      <div class="card-value green" id="d-lucro">R$0</div>
+      <div class="card-sub">Após todos os custos</div>
+    </div>
+    <div class="kpi-card red-accent">
+      <div class="card-label">Total de Gastos</div>
+      <div class="card-value red" id="d-gastos">R$0</div>
+      <div class="card-sub">Fixos + Variáveis + Invest.</div>
+    </div>
+    <div class="kpi-card yellow-accent">
+      <div class="card-label">A Receber</div>
+      <div class="card-value" style="color:var(--yellow)" id="d-receber">R$0</div>
+      <div class="card-sub">Pagamentos pendentes</div>
+    </div>
+  </div>
+
+  <!-- Alerta -->
+  <div class="alert alert-danger" id="alerta-prejuizo" style="display:none">
+    ⚠️ <div><strong>Atenção:</strong> os custos superam a receita no período. A PINK está operando com prejuízo. Revise os custos fixos e a precificação.</div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Composição dos gastos -->
+    <div class="card">
+      <div class="section-title">Composição dos Gastos</div>
+      <div style="display:flex;flex-direction:column;gap:12px" id="composicao-gastos"></div>
+    </div>
+
+    <!-- Divisão de lucro -->
+    <div class="card">
+      <div class="section-title">Divisão do Lucro Líquido (60/40)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div class="divisao-card">
+          <div class="divisao-name">Roberta</div>
+          <div class="divisao-value" id="d-roberta">R$0</div>
+          <div class="divisao-pct">60%</div>
+        </div>
+        <div class="divisao-card">
+          <div class="divisao-name">Agnes</div>
+          <div class="divisao-value" id="d-agnes">R$0</div>
+          <div class="divisao-pct">40%</div>
+        </div>
+      </div>
+      <div class="alert alert-info" style="margin:0;font-size:12px">
+        📌 Divisão sobre lucro líquido. Migração pra 50/50 quando a operação estabilizar.
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Status pedidos -->
+    <div class="card">
+      <div class="section-title">Status dos Pedidos</div>
+      <div style="display:flex;flex-direction:column;gap:12px" id="d-status-pedidos"></div>
+    </div>
+    <!-- Estoque alertas -->
+    <div class="card">
+      <div class="section-title">Alertas de Estoque</div>
+      <div id="d-estoque-alertas"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FINANCEIRO ============ -->
+<div class="section" id="financeiro">
+  <div class="page-title">Financeiro</div>
+  <div class="page-sub">Receitas, gastos e resultado do período</div>
+
+  <div class="grid-4">
+    <div class="kpi-card pink-accent">
+      <div class="card-label">Receita Bruta</div>
+      <div class="card-value pink" id="f-receita">R$0</div>
+    </div>
+    <div class="kpi-card red-accent">
+      <div class="card-label">Custos Fixos (3 meses)</div>
+      <div class="card-value red" id="f-fixos">R$0</div>
+    </div>
+    <div class="kpi-card red-accent">
+      <div class="card-label">Gastos Variáveis</div>
+      <div class="card-value red" id="f-variaveis">R$0</div>
+    </div>
+    <div class="kpi-card navy-accent">
+      <div class="card-label">Investimentos</div>
+      <div class="card-value" id="f-invest">R$0</div>
+    </div>
+  </div>
+
+  <!-- DESPESAS FIXAS -->
+  <div class="table-wrap" style="margin-bottom:24px">
+    <div class="table-header">
+      <div class="table-title">Despesas Fixas Mensais</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-fixo')">+ Adicionar</button>
+    </div>
+    <table>
+      <thead><tr><th>Despesa</th><th>Valor Mensal</th><th>Vencimento</th><th>Observação</th><th>Pago por</th><th></th></tr></thead>
+      <tbody id="tbody-fixos"></tbody>
+    </table>
+    <div style="padding:14px 20px;background:var(--gray-light);font-weight:600;font-size:13px;display:flex;justify-content:space-between">
+      <span>Total mensal</span><span id="total-fixos-mes">R$0</span>
+    </div>
+  </div>
+
+  <!-- GASTOS VARIÁVEIS -->
+  <div class="table-wrap" style="margin-bottom:24px">
+    <div class="table-header">
+      <div class="table-title">Gastos Variáveis (Insumos)</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="filter-chip active" onclick="setFilterVar('todos')" id="vchip-todos">Todos</button>
+        <button class="filter-chip" onclick="setFilterVar('Insumo')" id="vchip-Insumo">Insumo</button>
+        <button class="filter-chip" onclick="setFilterVar('Embalagem')" id="vchip-Embalagem">Embalagem</button>
+        <button class="filter-chip" onclick="setFilterVar('Marketing')" id="vchip-Marketing">Marketing</button>
+        <button class="filter-chip" onclick="setFilterVar('Serviço')" id="vchip-Serviço">Serviço</button>
+        <button class="filter-chip" onclick="setFilterVar('Manutenção')" id="vchip-Manutenção">Manutenção</button>
+        <button class="filter-chip" onclick="setFilterVar('Outros')" id="vchip-Outros">Outros</button>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-variavel')">+ Adicionar</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>Item</th><th>Fornecedor</th><th>Data</th><th>Qtd</th><th>Custo Unit.</th><th>Total</th><th>Classif.</th><th>Pago por</th><th></th></tr></thead>
+      <tbody id="tbody-variaveis"></tbody>
+    </table>
+    <div style="padding:14px 20px;background:var(--gray-light);font-weight:600;font-size:13px;display:flex;justify-content:space-between">
+      <span>Total variável</span><span id="total-variaveis">R$0</span>
+    </div>
+  </div>
+
+  <!-- INVESTIMENTOS -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <div class="table-title">Investimentos / Maquinário</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-invest')">+ Adicionar</button>
+    </div>
+    <table>
+      <thead><tr><th>Item</th><th>Data</th><th>Forma de Pagamento</th><th>Valor</th><th>Pago por</th><th></th></tr></thead>
+      <tbody id="tbody-invest"></tbody>
+    </table>
+  </div>
+
+  <!-- REEMBOLSOS PENDENTES -->
+  <div class="card" style="margin-top:0">
+    <div class="section-title">Reembolsos Pendentes à Sócias</div>
+    <div id="reembolso-summary" style="display:flex;gap:24px;flex-wrap:wrap"></div>
+    <div style="margin-top:12px;font-size:12px;color:var(--gray)">
+      🟡 Gastos pagos por Roberta ou Agnes com dinheiro próprio que a PINK deve reembolsar na divisão de lucro.
+    </div>
+  </div>
+</div>
+
+<!-- ============ PEDIDOS ============ -->
+<div class="section" id="pedidos">
+  <div class="page-title">Pedidos</div>
+  <div class="page-sub">Controle de pedidos com filtros de urgência e status</div>
+
+  <div class="grid-4" style="margin-bottom:16px">
+    <div class="kpi-card pink-accent">
+      <div class="card-label">Total de Pedidos</div>
+      <div class="card-value pink" id="p-total">0</div>
+    </div>
+    <div class="kpi-card green-accent">
+      <div class="card-label">Pagos</div>
+      <div class="card-value green" id="p-pagos">0</div>
+    </div>
+    <div class="kpi-card yellow-accent">
+      <div class="card-label">Parcial / Pendente</div>
+      <div class="card-value" style="color:var(--yellow)" id="p-pendentes">0</div>
+    </div>
+    <div class="kpi-card red-accent">
+      <div class="card-label">A Receber</div>
+      <div class="card-value red" id="p-areceber">R$0</div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <input type="text" class="search-input" placeholder="🔍 Buscar cliente ou produto..." id="search-pedidos" oninput="renderPedidos()">
+    <button class="filter-chip active" onclick="setFilter('todos')" id="chip-todos">Todos</button>
+    <button class="filter-chip" onclick="setFilter('urgente')" id="chip-urgente">🔴 Urgentes</button>
+    <button class="filter-chip" onclick="setFilter('producao')" id="chip-producao">Em Produção</button>
+    <button class="filter-chip" onclick="setFilter('pendente')" id="chip-pendente">Pagamento Pendente</button>
+    <button class="filter-chip" onclick="setFilter('entregue')" id="chip-entregue">Entregues</button>
+    <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-pedido')" style="margin-left:auto">+ Novo Pedido</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Período</th><th>Cliente</th><th>Produtos</th><th>Qtd</th>
+          <th>Valor Total</th><th>Restante</th><th>Pgto</th>
+          <th>Entrega</th><th>Status Entrega</th><th>Forma Entrega</th><th>Frete</th><th>Observações</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody-pedidos"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============ ESTOQUE ============ -->
+<div class="section" id="estoque">
+  <div class="page-title">Estoque</div>
+  <div class="page-sub">Controle de insumos e produtos</div>
+
+  <div class="filters">
+    <input type="text" class="search-input" placeholder="🔍 Buscar item..." id="search-estoque" oninput="renderEstoque()">
+    <button class="filter-chip active" onclick="setFilterEstoque('todos')" id="est-todos">Todos</button>
+    <button class="filter-chip" onclick="setFilterEstoque('zerado')" id="est-zerado">🔴 Zerado</button>
+    <button class="filter-chip" onclick="setFilterEstoque('baixo')" id="est-baixo">🟡 Estoque Baixo</button>
+    <button class="filter-chip" onclick="setFilterEstoque('ok')" id="est-ok">🟢 OK</button>
+    <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-estoque')" style="margin-left:auto">+ Adicionar Item</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>SKU</th><th>Categoria</th><th>Produto</th><th>Especificação</th>
+          <th>Qtd Atual</th><th>Mín</th><th>Unidade</th><th>Custo Unit.</th>
+          <th>Fornecedor</th><th>Status</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody-estoque"></tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ============ CATÁLOGO ============ -->
+<div class="section" id="catalogo">
+  <div class="page-title">Catálogo de Produtos</div>
+  <div class="page-sub">Preços de venda, custo estimado e margem por produto</div>
+
+  <div class="grid-4" style="margin-bottom:16px">
+    <div class="kpi-card pink-accent">
+      <div class="card-label">Total de Produtos</div>
+      <div class="card-value pink" id="cat-total">0</div>
+    </div>
+    <div class="kpi-card green-accent">
+      <div class="card-label">Margem Média</div>
+      <div class="card-value green" id="cat-margem">—</div>
+    </div>
+    <div class="kpi-card yellow-accent">
+      <div class="card-label">Sem Custo Cadastrado</div>
+      <div class="card-value" style="color:var(--yellow)" id="cat-semcusto">0</div>
+    </div>
+    <div class="kpi-card navy-accent">
+      <div class="card-label">Ticket Médio</div>
+      <div class="card-value" id="cat-ticket">—</div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <input type="text" class="search-input" placeholder="🔍 Buscar produto..." id="search-catalogo" oninput="renderCatalogo()">
+    <button class="filter-chip active" onclick="setFilterCat('todos')" id="cat-todos">Todos</button>
+    <button class="filter-chip" onclick="setFilterCat('Caixas')" id="cat-Caixas">Caixas</button>
+    <button class="filter-chip" onclick="setFilterCat('Papelaria')" id="cat-Papelaria">Papelaria</button>
+    <button class="filter-chip" onclick="setFilterCat('Diversos')" id="cat-Diversos">Diversos</button>
+    <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-produto')" style="margin-left:auto">+ Novo Produto</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Categoria</th><th>Produto</th><th>Descrição / Variação</th>
+          <th>Preço de Venda</th><th>Custo Estimado</th><th>Margem</th>
+          <th>Lucro Unit.</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody-catalogo"></tbody>
+    </table>
+  </div>
+  <div style="padding:12px 20px;font-size:12px;color:var(--gray);background:var(--white);border-radius:0 0 16px 16px;border:1px solid var(--border);border-top:none">
+    💡 <strong>Margem</strong> = (Preço de Venda − Custo) ÷ Preço de Venda. Custo em branco = margem não calculada. Preencha o custo para ver a margem real de cada produto.
+  </div>
+</div>
+
+</main>
+
+<!-- ============ MODALS ============ -->
+
+<!-- Modal Fixo -->
+<div class="modal-overlay" id="modal-add-fixo">
+  <div class="modal">
+    <div class="modal-title">Nova Despesa Fixa</div>
+    <div class="form-group"><label>Despesa</label><input id="fixo-nome" placeholder="Ex: Contador"></div>
+    <div class="form-row cols-2">
+      <div class="form-group"><label>Valor Mensal (R$)</label><input id="fixo-valor" type="number" step="0.01" placeholder="0,00"></div>
+      <div class="form-group"><label>Vencimento</label><input id="fixo-venc" placeholder="Ex: dia 20"></div>
+    </div>
+    <div class="form-group"><label>Observação</label><input id="fixo-obs" placeholder="Opcional"></div>
+    <div class="form-group"><label>Pago por</label>
+      <select id="fixo-pago"><option>PINK</option><option>Roberta</option><option>Agnes</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-fixo')">Cancelar</button>
+      <button class="btn btn-primary" onclick="addFixo()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Variavel -->
+<div class="modal-overlay" id="modal-add-variavel">
+  <div class="modal">
+    <div class="modal-title">Novo Gasto Variável</div>
+    <div class="form-group"><label>Item / Descrição</label><input id="var-nome" placeholder="Ex: Papel Kraft 300mm x 50m"></div>
+    <div class="form-row cols-2">
+      <div class="form-group"><label>Fornecedor</label><input id="var-forn" placeholder="Ex: IOX, Bling, ML..."></div>
+      <div class="form-group"><label>Data da Compra</label><input id="var-data" type="date"></div>
+    </div>
+    <div class="form-row cols-3">
+      <div class="form-group"><label>Quantidade</label><input id="var-qtd" type="number" step="0.01" placeholder="0"></div>
+      <div class="form-group"><label>Unidade</label><input id="var-un" placeholder="un, m, pc..."></div>
+      <div class="form-group"><label>Valor Total (R$)</label><input id="var-total" type="number" step="0.01" placeholder="0,00" oninput="calcVarUnit()"></div>
+    </div>
+    <div class="form-group"><label>Custo Unitário (calculado)</label><input id="var-unit" placeholder="Preenchido automaticamente" readonly style="background:var(--gray-light)"></div>
+    <div class="form-row cols-2">
+    <div class="form-group"><label>Classificação</label>
+      <select id="var-classif">
+        <option>Insumo</option>
+        <option>Embalagem</option>
+        <option>Marketing</option>
+        <option>Serviço</option>
+        <option>Manutenção</option>
+        <option>Outros</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Pago por</label>
+      <select id="var-pago"><option>PINK</option><option>Roberta</option><option>Agnes</option></select>
+    </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-variavel')">Cancelar</button>
+      <button class="btn btn-primary" onclick="addVariavel()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Investimento -->
+<div class="modal-overlay" id="modal-add-invest">
+  <div class="modal">
+    <div class="modal-title">Novo Investimento / Maquinário</div>
+    <div class="form-group"><label>Item</label><input id="inv-nome" placeholder="Ex: Guilhotina"></div>
+    <div class="form-row cols-2">
+      <div class="form-group"><label>Data</label><input id="inv-data" type="date"></div>
+      <div class="form-group"><label>Valor (R$)</label><input id="inv-valor" type="number" step="0.01" placeholder="0,00"></div>
+    </div>
+    <div class="form-group"><label>Forma de Pagamento</label><input id="inv-pgto" placeholder="Ex: PIX, 3x Visa 3439..."></div>
+    <div class="form-group"><label>Pago por</label>
+      <select id="inv-pago"><option>PINK</option><option>Roberta</option><option>Agnes</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-invest')">Cancelar</button>
+      <button class="btn btn-primary" onclick="addInvest()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Pedido -->
+<div class="modal-overlay" id="modal-add-pedido">
+  <div class="modal">
+    <div class="modal-title">Novo Pedido</div>
+    <div class="form-row cols-2">
+      <div class="form-group"><label>Período</label>
+        <select id="ped-periodo"><option>junho/2026</option><option>julho/2026</option><option>agosto/2026</option><option>setembro/2026</option></select>
+      </div>
+      <div class="form-group"><label>Cliente</label><input id="ped-cliente" placeholder="Nome do cliente"></div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group"><label>Telefone</label><input id="ped-tel" placeholder="71 9xxxx-xxxx"></div>
+      <div class="form-group"><label>Produtos</label><input id="ped-produtos" placeholder="Ex: Kit personalizado"></div>
+    </div>
+    <div class="form-row cols-3">
+      <div class="form-group"><label>Qtd</label><input id="ped-qtd" type="number" placeholder="1"></div>
+      <div class="form-group"><label>Valor Total (R$)</label><input id="ped-valor" type="number" step="0.01" placeholder="0,00"></div>
+      <div class="form-group"><label>Valor Restante (R$)</label><input id="ped-restante" type="number" step="0.01" placeholder="0,00"></div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group"><label>Forma de Pagamento</label>
+        <select id="ped-pgto"><option>PIX</option><option>Cartão de Crédito</option><option>Cartão de Débito</option><option>Dinheiro</option><option>A combinar</option></select>
+      </div>
+      <div class="form-group"><label>Status Pagamento</label>
+        <select id="ped-status-pgto"><option>Pago</option><option>Pagt Parcial 50%</option><option>Pagt Pendente</option><option>Em negociação</option></select>
+      </div>
+    </div>
+    <div class="form-row cols-3">
+      <div class="form-group"><label>Data de Entrega</label><input id="ped-entrega" type="date"></div>
+      <div class="form-group"><label>Forma de Entrega</label>
+        <select id="ped-entrega-forma"><option>Entrega Própria</option><option>Motoboy</option><option>Correios</option><option>Retirada</option><option>A definir</option></select>
+      </div>
+      <div class="form-group"><label>Frete (R$)</label><input id="ped-frete" type="number" step="0.01" placeholder="0,00"></div>
+    </div>
+    <div class="form-group"><label>Status do Pedido</label>
+      <select id="ped-status">
+        <option>Não iniciado</option><option>Em produção</option><option>Entregue</option><option>Enviado</option><option>Retirada</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Observações</label><textarea id="ped-obs" rows="2" placeholder="Detalhes do pedido..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-pedido')">Cancelar</button>
+      <button class="btn btn-primary" onclick="addPedido()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal Produto -->
+<div class="modal-overlay" id="modal-add-produto">
+  <div class="modal">
+    <div class="modal-title">Novo Produto</div>
+    <div class="form-row cols-2">
+      <div class="form-group"><label>Categoria</label>
+        <select id="prod-cat"><option>Caixas</option><option>Papelaria</option><option>Diversos</option></select>
+      </div>
+      <div class="form-group"><label>Produto</label><input id="prod-nome" placeholder="Ex: Caderno A5"></div>
+    </div>
+    <div class="form-group"><label>Descrição / Variação</label><input id="prod-desc" placeholder="Ex: Folhas lisas, 80fls"></div>
+    <div class="form-row cols-2">
+      <div class="form-group"><label>Preço de Venda (R$)</label><input id="prod-venda" type="number" step="0.01" placeholder="0,00"></div>
+      <div class="form-group"><label>Custo Estimado (R$)</label><input id="prod-custo" type="number" step="0.01" placeholder="0,00"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-produto')">Cancelar</button>
+      <button class="btn btn-primary" onclick="addProduto()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Estoque -->
+<div class="modal-overlay" id="modal-add-estoque">
+  <div class="modal">
+    <div class="modal-title">Novo Item de Estoque</div>
+    <div class="form-row cols-2">
+      <div class="form-group"><label>SKU</label><input id="est-sku" placeholder="Ex: PAP-037"></div>
+      <div class="form-group"><label>Categoria</label>
+        <select id="est-cat">
+          <option>Papéis e substratos</option><option>Encadernação</option><option>Cadernos e agendas</option>
+          <option>Garrafas e copos</option><option>Canetas</option><option>Embalagens</option><option>Outros</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group"><label>Produto / Grupo</label><input id="est-produto" placeholder="Ex: Papel sulfite"></div>
+      <div class="form-group"><label>Especificação</label><input id="est-spec" placeholder="Ex: A4 75g/m²"></div>
+    </div>
+    <div class="form-row cols-4">
+      <div class="form-group"><label>Qtd Atual</label><input id="est-qtd" type="number" placeholder="0"></div>
+      <div class="form-group"><label>Qtd Mínima</label><input id="est-min" type="number" placeholder="0"></div>
+      <div class="form-group"><label>Unidade</label><input id="est-un" placeholder="un, m, pc..."></div>
+      <div class="form-group"><label>Custo Unit. (R$)</label><input id="est-custo" type="number" step="0.01" placeholder="0,00"></div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group"><label>Fornecedor</label><input id="est-forn" placeholder="Ex: IOX, Bling..."></div>
+      <div class="form-group"><label>Localização</label><input id="est-loc" placeholder="Ex: Estoque principal"></div>
+    </div>
+    <div class="form-group"><label>Observações</label><input id="est-obs" placeholder="Opcional"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-estoque')">Cancelar</button>
+      <button class="btn btn-primary" onclick="addEstoque()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+
+
+// ============================================================
+// GOOGLE SHEETS INTEGRATION
+// ============================================================
+// Cole aqui a URL do seu Apps Script após implantar:
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsWLzd6mW0G1eWl7pKwnHhENgb-VLoP76CklMcuNIu0pUeQo310qpZ3DhUdZ_RCdee/exec';
+
+async function saveToSheets(action, rows) {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('COLE_AQUI')) return;
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action, rows }),
+    });
+  } catch(e) { console.warn('Sheets save failed:', e); }
+}
+
+async function loadFromSheets() {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('COLE_AQUI')) return;
+  try {
+    const actions = [
+      { key: 'pedidos',       action: 'getPedidos'    },
+      { key: 'fixos',         action: 'getFixos'      },
+      { key: 'variaveis',     action: 'getVariaveis'  },
+      { key: 'investimentos', action: 'getInvest'     },
+      { key: 'estoque',       action: 'getEstoque'    },
+      { key: 'catalogo',      action: 'getCatalogo'   },
+    ];
+    const results = await Promise.all(actions.map(a =>
+      fetch(APPS_SCRIPT_URL + '?action=' + a.action).then(r => r.json())
+    ));
+    results.forEach((data, i) => {
+      if (Array.isArray(data) && data.length > 0) {
+        state[actions[i].key] = data;
+      }
+    });
+    renderDashboard();
+    console.log('✅ Dados carregados do Google Sheets');
+  } catch(e) { console.warn('Sheets load failed:', e); }
+}
+
+function autoSave(section) {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('COLE_AQUI')) return;
+  const map = {
+    pedidos: 'savePedidos', fixos: 'saveFixos',
+    variaveis: 'saveVariaveis', investimentos: 'saveInvest',
+    estoque: 'saveEstoque', catalogo: 'saveCatalogo',
+  };
+  if (map[section]) saveToSheets(map[section], state[section]);
+}
+
+const state = {
+  fixos: [
+    { nome: 'DAS (MEI)', valor: 82.05, venc: 'dia 20', obs: 'Valor 2026 (comércio/indústria)' },
+    { nome: 'Domínio do site', valor: 193.28, venc: 'dia 22/06 (anual)', obs: 'Primeiro pagamento em 22/06/2026' },
+    { nome: 'E-mail corporativo', valor: 383.52, venc: 'dia 22/07', obs: 'Pacote 48 meses, primeiro pgto 22/07/2026' },
+    { nome: 'Hostinger (Agents Starter)', valor: 51.99, venc: '', obs: '' },
+    { nome: 'Claude', valor: 98.00, venc: '', obs: '' },
+    { nome: 'GPT (Chatinho)', valor: 107.00, venc: '', obs: '' },
+    { nome: 'Freepik', valor: 135.00, venc: '', obs: '' },
+    { nome: 'Drive da Ana', valor: 120.00, venc: '', obs: '' },
+    { nome: 'Pack de super ferramentas', valor: 65.00, venc: '', obs: '' },
+  ],
+  variaveis: [
+    { nome: 'Papel Pautado Colorido 14,8x10,5 C/100fls 90g (×6un)', forn: 'IOX', data: '2026-08-24', qtd: 6, un: 'pacote', total: 75.60, unit: 12.60, pago: 'Roberta', reembolsado: true },
+    { nome: 'Papel Photo 180g A3 50fls', forn: 'IOX', data: '2026-08-24', qtd: 1, un: 'pacote', total: 41.00, unit: 41.00, pago: 'Roberta', reembolsado: true },
+    { nome: 'Miolo de Agenda RF A03 2027 188fls (×3un)', forn: 'IOX', data: '2026-08-24', qtd: 3, un: 'un', total: 54.00, unit: 18.00, pago: 'Roberta', reembolsado: true },
+    { nome: 'Espátula com Feltro BRW', forn: 'IOX', data: '2026-08-24', qtd: 1, un: 'un', total: 12.00, unit: 12.00, pago: 'Roberta', reembolsado: true },
+    { nome: 'Papel A4 Rives Tradition Pale Cream 250g 5fls', forn: 'IOX', data: '2026-08-24', qtd: 1, un: 'pacote', total: 10.80, unit: 10.80, pago: 'Roberta', reembolsado: true },
+    { nome: 'Papel A4 Aspen 250g 5fls (×2pc)', forn: 'IOX', data: '2026-08-24', qtd: 2, un: 'pacote', total: 21.60, unit: 10.80, pago: 'Roberta', reembolsado: true },
+    { nome: 'Papel Polen 80g A4 100fls', forn: 'IOX', data: '2026-08-24', qtd: 1, un: 'pacote', total: 15.30, unit: 15.30, pago: 'Roberta', reembolsado: true },
+    { nome: 'Foil Ouro 20cm', forn: 'IOX', data: '2026-08-24', qtd: 1, un: 'mt', total: 6.30, unit: 6.30, pago: 'Roberta', reembolsado: true },
+    { nome: 'Miolo de Agenda Preto 2026 RF 2603 (×4un)', forn: 'IOX', data: '2026-08-24', qtd: 4, un: 'un', total: 72.00, unit: 18.00, pago: 'Roberta', reembolsado: true },
+    { nome: 'Caneca Cerâmica Branca 325ml LIVE SBLM (×38un)', forn: 'Bling/ESPER', data: '2026-08-20', qtd: 38, un: 'un', total: 370.80, unit: 9.76 },
+    { nome: 'Quebra-Cabeça Cartonado A4 60pcs (1 pacote=5un)', forn: 'Bling/ESPER', data: '2026-08-20', qtd: 1, un: 'pacote', total: 25.79, unit: 5.16 },
+    { nome: 'Caneca Cerâmica Interior e Alça Rosa 325ml (×2un)', forn: 'Bling/ESPER', data: '2026-08-20', qtd: 2, un: 'un', total: 28.04, unit: 14.02 },
+    { nome: 'Caneca Cerâmica Petit 90ml Verde Menta', forn: 'Bling/ESPER', data: '2026-08-20', qtd: 1, un: 'un', total: 21.73, unit: 21.73 },
+    { nome: 'Fita Térmica Sublimação 6mm 33m', forn: 'Bling/ESPER', data: '2026-08-20', qtd: 1, un: 'un', total: 8.89, unit: 8.89 },
+    { nome: '30 Caixas Acetato 8x8x4 para 4 Doces', forn: 'Mercado Livre', data: '2026-08-22', qtd: 30, un: 'un', total: 48.88, unit: 1.63, classif: 'Embalagem' },
+    { nome: '10 Sacolas Ecobag 30x40 Algodão Cru', forn: 'Mercado Livre', data: '2026-08-05', qtd: 10, un: 'un', total: 59.90, unit: 5.99, classif: 'Embalagem' },
+    { nome: '5 Sacolas Ecobag 35x40 Algodão Cru', forn: 'Mercado Livre', data: '2026-08-05', qtd: 5, un: 'un', total: 40.89, unit: 8.18, classif: 'Embalagem' },
+    { nome: '12 Pct Bloco Adesivo Neon 4 Cores 37,5x50mm', forn: 'Mercado Livre', data: '2026-07-29', qtd: 12, un: 'pacote', total: 65.00, unit: 5.42 },
+    { nome: 'Rolo Couro Ecológico Sintético 2cm x 10m', forn: 'Mercado Livre', data: '2026-07-29', qtd: 10, un: 'm', total: 25.90, unit: 2.59 },
+    { nome: 'Bopp Anti Risco 22cm x 50m', forn: 'Mercado Livre', data: '2026-07-21', qtd: 50, un: 'm', total: 78.95, unit: 1.58 },
+    { nome: '10 Cadernos Capa Dura c/ Elástico para Caneta', forn: 'Mercado Livre', data: '2026-07-11', qtd: 10, un: 'un', total: 69.40, unit: 6.94 },
+    { nome: 'Wire-o 5/8\'\' 2:1 120fls 50un A4', forn: 'Mercado Livre', data: '2026-06-26', qtd: 50, un: 'un', total: 72.90, unit: 1.46 },
+    { nome: '10 Cadernetas Capa Kraft Flex A5 100fls', forn: 'Mercado Livre', data: '2026-06-05', qtd: 10, un: 'un', total: 58.10, unit: 5.81 },
+    { nome: 'Bobina Papel Kraft 300mm x 50m 70g x2p', forn: 'Mercado Livre', data: '2026-06-04', qtd: 1, un: 'rolo', total: 40.16, unit: 40.16, classif: 'Embalagem' },
+    { nome: 'Bobina Papel Seda 210mm x 50m 50g x2p', forn: 'Mercado Livre', data: '2026-06-04', qtd: 1, un: 'rolo', total: 40.16, unit: 40.16, classif: 'Embalagem' },
+    { nome: 'Bobina Papel Seda 300mm x 50m 50g x2p', forn: 'Mercado Livre', data: '2026-06-04', qtd: 1, un: 'rolo', total: 40.16, unit: 40.16, classif: 'Embalagem' },
+    { nome: 'Papel Sulfite Branco A4 75g CHAMEX 500fls', forn: 'Kalunga', data: '2026-09-01', qtd: 1, un: 'pacote', total: 34.50, unit: 34.50, classif: 'Insumo' },
+    { nome: 'Despesas diversas (balas + isqueiro)', forn: 'Kalunga', data: '2026-09-01', qtd: 1, un: 'un', total: 14.30, unit: 14.30, classif: 'Outros' },
+    { nome: 'Flyer Dia dos Professores — Panfleto Couché 90g 200x140mm (500un)', forn: 'Zap Gráfica', data: '2026-08-06', qtd: 500, un: 'un', total: 111.88, unit: 0.22, classif: 'Marketing', pago: 'Roberta' },
+    { nome: 'Flyer Dia dos Professores — Panfleto Couché 90g 200x140mm (1000un)', forn: 'Zap Gráfica', data: '2026-08-14', qtd: 1000, un: 'un', total: 161.00, unit: 0.16, classif: 'Marketing', pago: 'Roberta' },
+    { nome: 'Cartão de Visita PINK Paper Club — Couché 300g Lam Fosca 91x51mm (1000un)', forn: 'Zap Gráfica', data: '2026-08-30', qtd: 1000, un: 'un', total: 127.49, unit: 0.13, classif: 'Marketing', pago: 'Roberta' },
+    { nome: 'Corte de caixas', forn: 'Rebeca Laser', data: '2026-07-17', qtd: 1, un: 'serviço', total: 165.00, unit: 165.00, classif: 'Serviço', pago: 'Roberta' },
+    { nome: 'Papel dourado para forrar caixas (pedido Arnaldo)', forn: 'IOX Brotas', data: '2026-07-24', qtd: 1, un: 'un', total: 164.00, unit: 164.00, classif: 'Insumo', pago: 'Roberta' },
+    { nome: 'DTF — impressão (produto a confirmar)', forn: 'Labdtf Salvador', data: '2026-08-18', qtd: 1, un: 'un', total: 55.00, unit: 55.00, classif: 'Insumo', pago: 'Roberta' },
+    { nome: 'Miolo de Agenda RF A03 2027 188fls (×19un)', forn: 'IOX', data: '2026-09-04', qtd: 19, un: 'un', total: 295.00, unit: 15.53, classif: 'Insumo', pago: 'Roberta' },
+    { nome: 'Papel Sulfite 75g A6 500fls (×4pc)', forn: 'IOX', data: '2026-09-04', qtd: 4, un: 'pacote', total: 39.60, unit: 9.90, classif: 'Insumo', pago: 'Roberta' },
+    { nome: 'Papel de Scrap 10', forn: 'IOX', data: '2026-09-04', qtd: 1, un: 'fl', total: 3.60, unit: 3.60, classif: 'Insumo', pago: 'Roberta' },
+    { nome: 'Panama Post-it 10 unidades (×2un)', forn: 'IOX', data: '2026-09-04', qtd: 2, un: 'un', total: 10.80, unit: 5.40, classif: 'Insumo', pago: 'Roberta' },
+    { nome: 'Panama 110x155 A6 20 unidades (×2un)', forn: 'IOX', data: '2026-09-04', qtd: 2, un: 'un', total: 21.60, unit: 10.80, classif: 'Insumo', pago: 'Roberta' },
+    { nome: 'Filme Adesivo Transparente 150g A4', forn: 'IOX', data: '2026-09-04', qtd: 1, un: 'pacote', total: 3.60, unit: 3.60, classif: 'Insumo', pago: 'Roberta' },
+  ],
+  investimentos: [
+    { nome: 'Impressora Canon G3110 Multi Wi-Fi', data: '2026-08-01', pgto: 'PIX', valor: 809.48 },
+  ],
+  pedidos: [
+    { periodo:'junho/2026', cliente:'Ismael', tel:'61 9113-6573', produtos:'Kit Dia dos Namorados', qtd:1, valor:374, restante:0, pgto:'Pix', statusPgto:'Pago', entrega:'2026-06-20', entregaForma:'', frete:0, statusPedido:'Entregue', obs:'' },
+    { periodo:'junho/2026', cliente:'Lucy Designer Interiores', tel:'71 9250-8551', produtos:'Agendas corporativas', qtd:15, valor:1520, restante:0, pgto:'Pix', statusPgto:'Pago', entrega:'2026-04-28', entregaForma:'Entrega Própria', frete:0, statusPedido:'Entregue', obs:'' },
+    { periodo:'julho/2026', cliente:'Arnaldo (JUNTOS)', tel:'71 9100-2553', produtos:'Caixas', qtd:10, valor:1200, restante:600, pgto:'Pix', statusPgto:'Pagt Parcial 50%', entrega:'', entregaForma:'Correios', frete:370, statusPedido:'Em produção', obs:'Será uma caixa bandeja de brinde A5' },
+    { periodo:'junho/2026', cliente:'Arnaldo (PIVA)', tel:'71 9100-2553', produtos:'Cadernos A5', qtd:5, valor:0, restante:0, pgto:'Pix', statusPgto:'Pagt Pendente', entrega:'', entregaForma:'', frete:0, statusPedido:'Não iniciado', obs:'' },
+    { periodo:'julho/2026', cliente:'Lorena', tel:'71 99211-1023', produtos:'Kits personalizados', qtd:7, valor:2255, restante:0, pgto:'', statusPgto:'Pago', entrega:'2026-07-31', entregaForma:'Correios', frete:0, statusPedido:'Em produção', obs:'7 kits: caixa bandeja, planner organizacional ou agenda 2027, devocional, caderno, post-it, copo térmico, caneca e caneta. 5 kits versão 1 + 2 kits versão 2 (caixa 2 maletas)' },
+    { periodo:'julho/2026', cliente:'Dona Iara Martins', tel:'71 9737-9550', produtos:'Kits personalizados', qtd:2, valor:340, restante:0, pgto:'Pix', statusPgto:'Pago', entrega:'2026-08-01', entregaForma:'Entrega Própria', frete:0, statusPedido:'Em produção', obs:'Kit com caixa 2 maletas, 2 cadernos' },
+    { periodo:'julho/2026', cliente:'Helena Pilates (Nucleo de movimento pilates)', tel:'71 99913-577', produtos:'Tapa olhos (de arroz) e almofada térmica (35x15)', qtd:16, valor:405, restante:405, pgto:'Pix', statusPgto:'Pagt Pendente', entrega:'2026-08-06', entregaForma:'Entrega Própria', frete:10, statusPedido:'Não iniciado', obs:'São 15 tapas olhos e 1 almofada' },
+    { periodo:'julho/2026', cliente:'Grace', tel:'71 8811-1225', produtos:'Blocos e caderno', qtd:7, valor:250, restante:0, pgto:'', statusPgto:'Pago', entrega:'2026-07-26', entregaForma:'Motoboy', frete:0, statusPedido:'Entregue', obs:'São 6 blocos e 1 caderno' },
+    { periodo:'julho/2026', cliente:'Michele Oliveira', tel:'71 9188-8622', produtos:'Kit personalizado', qtd:1, valor:230, restante:0, pgto:'Pix', statusPgto:'Pago', entrega:'2026-07-25', entregaForma:'Motoboy', frete:0, statusPedido:'Entregue', obs:'Pagamento pendente para o dia' },
+    { periodo:'julho/2026', cliente:'Adelaide', tel:'71 9972-7919', produtos:'Bloquinho A6 (aax15,5)', qtd:1, valor:30, restante:0, pgto:'', statusPgto:'', entrega:'', entregaForma:'', frete:0, statusPedido:'Em negociação', obs:'' },
+    { periodo:'julho/2026', cliente:'Milena Nere', tel:'71 8502-0168', produtos:'Agenda (agosto a dezembro completa com caderno)', qtd:1, valor:95, restante:0, pgto:'', statusPgto:'', entrega:'', entregaForma:'', frete:0, statusPedido:'Em negociação', obs:'Pediu para iniciar a produção no dia — mensagem para confirmar o pedido — aguardando resposta' },
+    { periodo:'abril/2026', cliente:'Priscilla Araujo', tel:'71 9168-3057', produtos:'Etiquetas De / Para', qtd:24, valor:35, restante:0, pgto:'Pix', statusPgto:'Pago', entrega:'2026-08-17', entregaForma:'Entrega Própria', frete:15, statusPedido:'Entregue', obs:'' },
+    { periodo:'abril/2026', cliente:'Tainã Moura', tel:'71 9711-1743', produtos:'Caneca Dia dos Pais', qtd:4, valor:176, restante:0, pgto:'Pix', statusPgto:'Pago', entrega:'2026-08-08', entregaForma:'', frete:0, statusPedido:'Entregue', obs:'Canecas com caixa' },
+    { periodo:'abril/2026', cliente:'Iasmin Melo', tel:'71 99152-2513', produtos:'Kit personalizado', qtd:1, valor:273, restante:0, pgto:'Pix', statusPgto:'Pago', entrega:'2026-08-27', entregaForma:'Retirada', frete:0, statusPedido:'Não iniciado', obs:'Caixa A5, Agenda 2027, Bloco Do It, Post It' },
+    { periodo:'agosto/2026', cliente:'Simone', tel:'', produtos:'6 Planners Trimestrais', qtd:6, valor:198, restante:0, pgto:'', statusPgto:'Pago', entrega:'', entregaForma:'', frete:0, statusPedido:'Entregue', obs:'6 Planners Trimestrais — kit 4 brochuras dividindo o ano' },
+    { periodo:'agosto/2026', cliente:'Lorena Pudim', tel:'71 99279-5189', produtos:'Caixa P, Bloco A6 e Caderneta A6', qtd:3, valor:130, restante:130, pgto:'', statusPgto:'Pagt Pendente', entrega:'2026-08-27', entregaForma:'', frete:0, statusPedido:'Entregue', obs:'Permuta — vai reembolsar o caixa da PINK' },
+    { periodo:'junho/2026', cliente:'Virna', tel:'71 9973-7980', produtos:'10 Cartões Sociais com Envelope', qtd:10, valor:105, restante:0, pgto:'', statusPgto:'Pago', entrega:'2026-06-06', entregaForma:'', frete:0, statusPedido:'Entregue', obs:'10 cartões sociais com envelope personalizados' },
+    { periodo:'setembro/2026', cliente:'Layla Almeida', tel:'71 98116-5770', produtos:'Kit personalizado', qtd:8, valor:1544, restante:1544, pgto:'', statusPgto:'Pagt Pendente', entrega:'', entregaForma:'', frete:0, statusPedido:'Não iniciado', obs:'8 ecobags, 8 garrafas, 8 planejadores de aula' },
+    { periodo:'agosto/2026', cliente:'Lucy Bonfim', tel:'71 99250-8551', produtos:'4 Agendas 2026', qtd:4, valor:380, restante:380, pgto:'', statusPgto:'Pagt Pendente', entrega:'2026-09-08', entregaForma:'', frete:0, statusPedido:'Não iniciado', obs:'Ruim de pagar' },
+    { periodo:'setembro/2026', cliente:'Tatiana Miranda', tel:'71 9971-1301', produtos:'3 Planners 2027 e 1 Bloco com Post-it', qtd:4, valor:370, restante:0, pgto:'', statusPgto:'Pago', entrega:'2026-09-01', entregaForma:'', frete:0, statusPedido:'Entregue', obs:'3 Planners 2027 A5 + 1 Bloco com Post-it' },
+    { periodo:'setembro/2026', cliente:'Valquíria', tel:'71 9982-0524', produtos:'23 Caderninhos com Tag', qtd:23, valor:770.50, restante:770.50, pgto:'', statusPgto:'Pagt Pendente', entrega:'2026-09-19', entregaForma:'', frete:0, statusPedido:'Não iniciado', obs:'23 caderninhos personalizados com tag — R$35,50 cada' },
+    { periodo:'junho/2026', cliente:'Thiago Kalil', tel:'71 9987-5152', produtos:'1 Quebra-Cabeça e 1 Caneca', qtd:2, valor:89, restante:0, pgto:'', statusPgto:'Pago', entrega:'2026-06-11', entregaForma:'', frete:0, statusPedido:'Entregue', obs:'1 Quebra-Cabeça Cartonado A4 60pcs + 1 Caneca personalizada' },
+  ],
+  estoque: [
+    { sku:'PAP-001', cat:'Papéis e substratos', produto:'Papel sulfite', spec:'A4 75g/m² (210×297mm)', cor:'Branco', marca:'IOX', un:'pacote', conteudo:'500 folhas', qtd:0, min:5, custo:0, forn:'IOX', loc:'Estoque principal', obs:'Conte apenas pacotes fechados. Ao abrir um pacote, registre saída de 1 pacote' },
+    { sku:'PAP-002', cat:'Papéis e substratos', produto:'Papel sulfite', spec:'A5 75g/m² (148×210mm)', cor:'Branco', marca:'IOX', un:'pacote', conteudo:'500 folhas', qtd:3, min:5, custo:0, forn:'IOX', loc:'Estoque principal', obs:'Identificado nas fotos. Confirmar conteúdo da embalagem' },
+    { sku:'PAP-003', cat:'Papéis e substratos', produto:'Papel sulfite', spec:'A6 75g/m² (105×148,5mm)', cor:'Branco', marca:'IOX', un:'pacote', conteudo:'500 folhas', qtd:4, min:5, custo:0, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-004', cat:'Papéis e substratos', produto:'Papel sulfite', spec:'A7 74,2×105mm', cor:'Branco', marca:'IOX', un:'pacote', conteudo:'500 folhas', qtd:11, min:5, custo:0, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-005', cat:'Papéis e substratos', produto:'Papel sulfite', spec:'Universitário 75g/m² (180×270mm)', cor:'Branco', marca:'IOX', un:'pacote', conteudo:'500 folhas', qtd:3, min:5, custo:0, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-006', cat:'Papéis e substratos', produto:'Papel sulfite', spec:'A4 especial (para convites etc.) 216g/m²', cor:'Branco', marca:'IOX', un:'pacote', conteudo:'50 folhas', qtd:1, min:5, custo:0, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-007', cat:'Papéis e substratos', produto:'Papel sulfite', spec:'Quadrado P', cor:'Branco', marca:'IOX', un:'pacote', conteudo:'', qtd:0, min:5, custo:0, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-008', cat:'Papéis e substratos', produto:'Papel sulfite', spec:'Quadrado M 180×180mm 500fls', cor:'Branco', marca:'IOX', un:'pacote', conteudo:'500 folhas', qtd:0, min:5, custo:0, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-009', cat:'Papéis e substratos', produto:'Papel sulfite', spec:'Quadrado G', cor:'Branco', marca:'IOX', un:'pacote', conteudo:'', qtd:0, min:5, custo:0, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-010', cat:'Papéis e substratos', produto:'Papel fotográfico', spec:'A4 130g/m²', cor:'Branco', marca:'MASTERPRINT', un:'pacote', conteudo:'50 folhas', qtd:1, min:5, custo:0, forn:'', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-011', cat:'Papéis e substratos', produto:'Papel sublimático', spec:'A4 100g/m²', cor:'Branco', marca:'MASTERPRINT', un:'pacote', conteudo:'100 folhas', qtd:1, min:5, custo:0, forn:'', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-012', cat:'Papéis e substratos', produto:'Papel ofício', spec:'A4 90g/m²', cor:'Branco', marca:'CHAMEX', un:'pacote', conteudo:'500 folhas', qtd:1, min:5, custo:0, forn:'', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-013', cat:'Encadernação', produto:'Capas', spec:'A5 — Espessura 1,7 (155×215mm)', cor:'Pardo', marca:'IOX', un:'pacote', conteudo:'20 folhas', qtd:0, min:5, custo:0, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-014', cat:'Encadernação', produto:'Capas', spec:'A6 — Espessura 1,7 (80×110mm)', cor:'Pardo', marca:'IOX', un:'pacote', conteudo:'20 folhas', qtd:4, min:5, custo:0, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-015', cat:'Encadernação', produto:'Capas', spec:'A4 especial — Espessura 1,7 (110×155mm)', cor:'Pardo', marca:'IOX', un:'pacote', conteudo:'20 folhas', qtd:0, min:5, custo:0, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-016', cat:'Encadernação', produto:'Capas', spec:'Universitário — Espessura 1,70 (185×275mm)', cor:'Pardo', marca:'IOX', un:'pacote', conteudo:'20 folhas', qtd:2, min:5, custo:0, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-017', cat:'Encadernação', produto:'Capas', spec:'Retangular — Espessura 1,7 (115×215mm)', cor:'Pardo', marca:'IOX', un:'pacote', conteudo:'20 folhas', qtd:2, min:5, custo:0, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-019', cat:'Outros', produto:'Bloco', spec:'Corporativo', cor:'Preto', marca:'', un:'pacote', conteudo:'', qtd:10, min:5, custo:0, forn:'', loc:'', obs:'' },
+    { sku:'PAP-020', cat:'Outros', produto:'Mousepad', spec:'', cor:'', marca:'', un:'pacote', conteudo:'', qtd:0, min:5, custo:0, forn:'', loc:'', obs:'' },
+    { sku:'PAP-021', cat:'Cadernos e agendas', produto:'Caderno', spec:'Moleskine "M"', cor:'', marca:'', un:'pacote', conteudo:'', qtd:10, min:5, custo:0, forn:'', loc:'', obs:'' },
+    { sku:'PAP-022', cat:'Cadernos e agendas', produto:'Caderno', spec:'Moleskine "G"', cor:'', marca:'', un:'pacote', conteudo:'', qtd:4, min:5, custo:0, forn:'', loc:'', obs:'' },
+    { sku:'PAP-023', cat:'Garrafas e copos', produto:'Garrafa', spec:'Tampa de Bambu', cor:'', marca:'', un:'un', conteudo:'', qtd:2, min:5, custo:0, forn:'', loc:'', obs:'' },
+    { sku:'PAP-024', cat:'Garrafas e copos', produto:'Garrafa', spec:'Tampa "C" C/ Alça', cor:'Preto', marca:'', un:'un', conteudo:'', qtd:21, min:5, custo:0, forn:'', loc:'', obs:'' },
+    { sku:'PAP-025', cat:'Garrafas e copos', produto:'Garrafa', spec:'Tampa "B" C/ Gancho', cor:'Preto', marca:'', un:'un', conteudo:'', qtd:1, min:5, custo:0, forn:'', loc:'', obs:'' },
+    { sku:'PAP-026', cat:'Garrafas e copos', produto:'Canecas', spec:'Cerâmica', cor:'', marca:'', un:'un', conteudo:'', qtd:7, min:5, custo:0, forn:'', loc:'', obs:'' },
+    { sku:'PAP-027', cat:'Garrafas e copos', produto:'Canecas', spec:'Metal "G"', cor:'', marca:'', un:'un', conteudo:'', qtd:2, min:5, custo:0, forn:'', loc:'', obs:'' },
+    { sku:'PAP-028', cat:'Garrafas e copos', produto:'Canecas', spec:'Metal "M"', cor:'', marca:'', un:'un', conteudo:'', qtd:2, min:5, custo:0, forn:'', loc:'', obs:'' },
+    { sku:'PAP-029', cat:'Garrafas e copos', produto:'Canecas', spec:'Coloridas', cor:'', marca:'', un:'un', conteudo:'', qtd:7, min:5, custo:0, forn:'', loc:'', obs:'' },
+    { sku:'PAP-030', cat:'Garrafas e copos', produto:'Canecas', spec:'Especial "Dourado"', cor:'', marca:'', un:'un', conteudo:'', qtd:1, min:5, custo:0, forn:'', loc:'', obs:'' },
+    { sku:'PAP-031', cat:'Garrafas e copos', produto:'Canecas', spec:'Cerâmica Branca 325ml LIVE SBLM', cor:'Branca', marca:'', un:'un', conteudo:'', qtd:36, min:10, custo:9.76, forn:'Bling/ESPER', loc:'Estoque principal', obs:'38 compradas, 2 já utilizadas' },
+    { sku:'PAP-031B', cat:'Garrafas e copos', produto:'Canecas', spec:'Cerâmica Interior e Alça Rosa 325ml', cor:'Rosa bebê', marca:'', un:'un', conteudo:'', qtd:2, min:2, custo:14.02, forn:'Bling/ESPER', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-031C', cat:'Garrafas e copos', produto:'Canecas', spec:'Cerâmica Petit 90ml Fosca Verde Menta', cor:'Verde menta', marca:'', un:'un', conteudo:'', qtd:1, min:2, custo:21.73, forn:'Bling/ESPER', loc:'Estoque principal', obs:'' },
+    { sku:'PAP-032', cat:'Canetas', produto:'Caneta', spec:'Especial', cor:'Rosa', marca:'', un:'un', conteudo:'', qtd:5, min:5, custo:0, forn:'', loc:'', obs:'' },
+    { sku:'PAP-033', cat:'Canetas', produto:'Caneta', spec:'Especial Gordinha', cor:'', marca:'', un:'un', conteudo:'', qtd:4, min:5, custo:0, forn:'', loc:'', obs:'' },
+    { sku:'PAP-034', cat:'Canetas', produto:'Caneta', spec:'Diamante', cor:'', marca:'', un:'un', conteudo:'', qtd:21, min:5, custo:0, forn:'', loc:'', obs:'' },
+    { sku:'PAP-035', cat:'Canetas', produto:'Caneta', spec:'Plotagem', cor:'', marca:'', un:'un', conteudo:'', qtd:75, min:10, custo:0, forn:'', loc:'', obs:'' },
+    // Itens das notas fiscais
+    { sku:'INS-001', cat:'Papéis e substratos', produto:'Papel Pautado Colorido', spec:'14,8×10,5cm C/100fls 90g', cor:'Colorido', marca:'', un:'pacote', conteudo:'100 folhas', qtd:6, min:2, custo:12.60, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'INS-002', cat:'Papéis e substratos', produto:'Papel Photo', spec:'180g A3 50fls', cor:'', marca:'', un:'pacote', conteudo:'50 folhas', qtd:1, min:1, custo:41.00, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'INS-003', cat:'Encadernação', produto:'Miolo de Agenda', spec:'RF A03 2027 188fls', cor:'', marca:'IOX', un:'un', conteudo:'188 folhas', qtd:3, min:2, custo:18.00, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'INS-004', cat:'Outros', produto:'Espátula com Feltro', spec:'BRW', cor:'', marca:'BRW', un:'un', conteudo:'', qtd:1, min:1, custo:12.00, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'INS-005', cat:'Papéis e substratos', produto:'Papel A4 Rives Tradition', spec:'Pale Cream 250g 5fls', cor:'Creme', marca:'', un:'pacote', conteudo:'5 folhas', qtd:1, min:1, custo:10.80, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'INS-006', cat:'Papéis e substratos', produto:'Papel A4 Aspen', spec:'250g 5fls', cor:'', marca:'', un:'pacote', conteudo:'5 folhas', qtd:2, min:1, custo:10.80, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'INS-007', cat:'Papéis e substratos', produto:'Papel Polen 80g A4', spec:'100fls', cor:'', marca:'', un:'pacote', conteudo:'100 folhas', qtd:1, min:1, custo:15.30, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'INS-008', cat:'Encadernação', produto:'Foil Ouro', spec:'20cm RF OR 026', cor:'Ouro', marca:'', un:'m', conteudo:'', qtd:1, min:1, custo:6.30, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'INS-009', cat:'Encadernação', produto:'Miolo de Agenda Preto', spec:'2026 RF 2603 1D por P', cor:'Preto', marca:'', un:'un', conteudo:'', qtd:4, min:2, custo:18.00, forn:'IOX', loc:'Estoque principal', obs:'' },
+    { sku:'INS-010', cat:'Outros', produto:'Quebra-Cabeça Cartonado', spec:'A4 60pcs Aladim Brilho (5un/pacote)', cor:'', marca:'', un:'un', conteudo:'', qtd:5, min:2, custo:5.16, forn:'Bling/ESPER', loc:'Estoque principal', obs:'1 pacote = 5 unidades' },
+    { sku:'INS-011', cat:'Outros', produto:'Fita Térmica Sublimação', spec:'6mm 33m', cor:'', marca:'', un:'un', conteudo:'', qtd:1, min:1, custo:8.89, forn:'Bling/ESPER', loc:'Estoque principal', obs:'' },
+    { sku:'INS-012', cat:'Embalagens', produto:'Caixas Acetato', spec:'8×8×4cm para 4 Doces', cor:'Transparente', marca:'', un:'un', conteudo:'', qtd:30, min:10, custo:1.63, forn:'Mercado Livre', loc:'Estoque principal', obs:'' },
+    { sku:'INS-013', cat:'Embalagens', produto:'Sacola Ecobag', spec:'30×40cm 100% Algodão Cru', cor:'Natural', marca:'', un:'un', conteudo:'', qtd:10, min:5, custo:5.99, forn:'Mercado Livre', loc:'Estoque principal', obs:'' },
+    { sku:'INS-014', cat:'Embalagens', produto:'Sacola Ecobag', spec:'35×40cm 100% Algodão Cru', cor:'Natural', marca:'', un:'un', conteudo:'', qtd:5, min:5, custo:8.18, forn:'Mercado Livre', loc:'Estoque principal', obs:'' },
+    { sku:'INS-015', cat:'Outros', produto:'Bloco Adesivo Neon', spec:'4 Cores 37,5×50mm 4×100fls', cor:'Neon', marca:'', un:'pacote', conteudo:'400 folhas', qtd:12, min:5, custo:5.42, forn:'Mercado Livre', loc:'Estoque principal', obs:'' },
+    { sku:'INS-016', cat:'Outros', produto:'Couro Ecológico Sintético', spec:'2cm x 10m por rolo', cor:'', marca:'', un:'m', conteudo:'', qtd:10, min:2, custo:2.59, forn:'Mercado Livre', loc:'Estoque principal', obs:'' },
+    { sku:'INS-017', cat:'Outros', produto:'Bopp Anti Risco', spec:'22cm', cor:'', marca:'', un:'m', conteudo:'', qtd:50, min:10, custo:1.58, forn:'Mercado Livre', loc:'Estoque principal', obs:'' },
+    { sku:'INS-018', cat:'Cadernos e agendas', produto:'Cadernos Capa Dura', spec:'Com Elástico para Caneta', cor:'', marca:'', un:'un', conteudo:'', qtd:10, min:5, custo:6.94, forn:'Mercado Livre', loc:'Estoque principal', obs:'' },
+    { sku:'INS-019', cat:'Encadernação', produto:'Wire-o', spec:'5/8\'\' 2:1 120fls A4', cor:'', marca:'', un:'un', conteudo:'', qtd:50, min:10, custo:1.46, forn:'Mercado Livre', loc:'Estoque principal', obs:'' },
+    { sku:'INS-020', cat:'Cadernos e agendas', produto:'Cadernetas Capa Kraft Flex', spec:'A5 Bloco Desenho 100fls', cor:'Kraft', marca:'', un:'un', conteudo:'100 folhas', qtd:10, min:5, custo:5.81, forn:'Mercado Livre', loc:'Estoque principal', obs:'' },
+    { sku:'INS-021', cat:'Embalagens', produto:'Bobina Papel Kraft', spec:'300mm×50m 70g x2p Pardo', cor:'Pardo', marca:'', un:'rolo', conteudo:'50m', qtd:1, min:1, custo:40.16, forn:'Mercado Livre', loc:'Estoque principal', obs:'' },
+    { sku:'INS-022', cat:'Embalagens', produto:'Bobina Papel Seda', spec:'210mm×50m 50g x2p', cor:'', marca:'', un:'rolo', conteudo:'50m', qtd:1, min:1, custo:40.16, forn:'Mercado Livre', loc:'Estoque principal', obs:'' },
+    { sku:'INS-023', cat:'Embalagens', produto:'Bobina Papel Seda', spec:'300mm×50m 50g x2p', cor:'', marca:'', un:'rolo', conteudo:'50m', qtd:1, min:1, custo:40.16, forn:'Mercado Livre', loc:'Estoque principal', obs:'' },
+    { sku:'INS-024', cat:'Papéis e substratos', produto:'Papel Transfer Glossy', spec:'A4 160g/m² — Tecido Claro — 5fls/pacote', cor:'', marca:'Masterprint', un:'pacote', conteudo:'5 folhas', qtd:1, min:1, custo:0, forn:'', loc:'Estoque principal', obs:'Para impressão em tecido claro. Impressão à prova d\'água, secagem rápida.' },
+    { sku:'INS-025', cat:'Papéis e substratos', produto:'Papel Transfer Glossy', spec:'A4 235g — Tecido Escuro — 5fls/pacote', cor:'', marca:'Masterprint', un:'pacote', conteudo:'5 folhas', qtd:1, min:1, custo:0, forn:'', loc:'Estoque principal', obs:'Para impressão em tecido escuro. Impressão à prova d\'água, secagem rápida.' },
+    { sku:'INS-026', cat:'Embalagens', produto:'Capa para Post-it', spec:'', cor:'', marca:'', un:'un', conteudo:'', qtd:0, min:5, custo:0, forn:'A definir', loc:'', obs:'🛒 COMPRAR — fornecedor a definir' },
+    { sku:'INS-027', cat:'Encadernação', produto:'Miolo de Agenda', spec:'RF A03 2027 188fls (lote set/26)', cor:'', marca:'IOX', un:'un', conteudo:'188 folhas', qtd:19, min:2, custo:15.53, forn:'IOX', loc:'Estoque principal', obs:'Compra 04/09/2026 — pago por Roberta' },
+    { sku:'INS-028', cat:'Papéis e substratos', produto:'Papel Sulfite', spec:'75g A6 500fls', cor:'Branco', marca:'', un:'pacote', conteudo:'500 folhas', qtd:4, min:2, custo:9.90, forn:'IOX', loc:'Estoque principal', obs:'Compra 04/09/2026 — pago por Roberta' },
+    { sku:'INS-029', cat:'Papéis e substratos', produto:'Papel de Scrap', spec:'10', cor:'', marca:'', un:'fl', conteudo:'', qtd:1, min:1, custo:3.60, forn:'IOX', loc:'Estoque principal', obs:'Compra 04/09/2026 — pago por Roberta' },
+    { sku:'INS-030', cat:'Outros', produto:'Panama Post-it', spec:'10 unidades', cor:'', marca:'', un:'un', conteudo:'10 unidades', qtd:2, min:1, custo:5.40, forn:'IOX', loc:'Estoque principal', obs:'Compra 04/09/2026 — pago por Roberta' },
+    { sku:'INS-031', cat:'Outros', produto:'Panama', spec:'110x155 A6 — 20 unidades', cor:'', marca:'', un:'un', conteudo:'20 unidades', qtd:2, min:1, custo:10.80, forn:'IOX', loc:'Estoque principal', obs:'Compra 04/09/2026 — pago por Roberta' },
+    { sku:'INS-032', cat:'Papéis e substratos', produto:'Filme Adesivo Transparente', spec:'150g A4', cor:'Transparente', marca:'', un:'pacote', conteudo:'', qtd:1, min:1, custo:3.60, forn:'IOX', loc:'Estoque principal', obs:'Compra 04/09/2026 — pago por Roberta' },
+  ],
+  filtro: 'todos',
+  filtroEst: 'todos',
+};
+
+const MESES = 3;
+function calcReceita() { return state.pedidos.reduce((a,p) => a + (p.valor||0), 0); }
+function calcAReceber() { return state.pedidos.reduce((a,p) => a + (p.restante||0), 0); }
+
+// ============================================================
+// UTILS
+// ============================================================
+const fmt = v => 'R$' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtDate = d => d ? d.split('-').reverse().join('/') : '—';
+
+function isUrgente(entrega) {
+  if (!entrega) return false;
+  const diff = (new Date(entrega) - new Date()) / (1000*60*60*24);
+  return diff <= 5 && diff >= 0;
+}
+
+function statusPedidoBadge(s) {
+  const map = {
+    'Entregue': 'badge-green', 'Em produção': 'badge-pink',
+    'Não iniciado': 'badge-red', 'Enviado': 'badge-navy',
+    'Retirada': 'badge-navy',
+  };
+  return `<span class="badge ${map[s]||'badge-gray'}">${s}</span>`;
+}
+
+function statusPgtoBadge(s) {
+  const map = {
+    'Pago': 'badge-green', 'Pagt Parcial 50%': 'badge-yellow',
+    'Pagt Pendente': 'badge-red', 'Em negociação': 'badge-gray',
+  };
+  return `<span class="badge ${map[s]||'badge-gray'}">${s||'—'}</span>`;
+}
+
+// ============================================================
+// CALCULOS
+// ============================================================
+function calcTotais() {
+  const fixoMes = state.fixos.reduce((a,b) => a + b.valor, 0);
+  const fixoTotal = fixoMes * MESES;
+  const varTotal = state.variaveis.reduce((a,b) => a + b.total, 0);
+  const invTotal = state.investimentos.reduce((a,b) => a + b.valor, 0);
+  const gastos = fixoTotal + varTotal + invTotal;
+  const lucro = calcReceita() - gastos;
+  return { fixoMes, fixoTotal, varTotal, invTotal, gastos, lucro };
+}
+
+// ============================================================
+// RENDER DASHBOARD
+// ============================================================
+function renderDashboard() {
+  const { fixoMes, fixoTotal, varTotal, invTotal, gastos, lucro } = calcTotais();
+
+  document.getElementById('d-receita').textContent = fmt(calcReceita());
+  document.getElementById('d-lucro').textContent = fmt(lucro);
+  document.getElementById('d-lucro').className = 'card-value ' + (lucro >= 0 ? 'green' : 'red');
+  document.getElementById('d-gastos').textContent = fmt(gastos);
+  document.getElementById('d-receber').textContent = fmt(calcAReceber());
+  document.getElementById('alerta-prejuizo').style.display = lucro < 0 ? 'flex' : 'none';
+
+  // Divisão
+  const roberta = Math.max(0, lucro * 0.6);
+  const agnes = Math.max(0, lucro * 0.4);
+  document.getElementById('d-roberta').textContent = fmt(roberta);
+  document.getElementById('d-agnes').textContent = fmt(agnes);
+
+  // Composição gastos
+  const comp = document.getElementById('composicao-gastos');
+  const items = [
+    { label: 'Custos Fixos (3 meses)', val: fixoTotal, color: '#DC2626' },
+    { label: 'Gastos Variáveis (Insumos)', val: varTotal, color: '#D97706' },
+    { label: 'Investimentos', val: invTotal, color: '#6B7280' },
+  ];
+  comp.innerHTML = items.map(i => {
+    const pct = gastos > 0 ? (i.val/gastos*100).toFixed(1) : 0;
+    const pctR = calcReceita() > 0 ? (i.val/calcReceita()*100).toFixed(1) : 0;
+    return `<div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:13px;font-weight:500">${i.label}</span>
+        <span style="font-size:13px;font-weight:600">${fmt(i.val)} <span style="color:var(--gray);font-weight:400">(${pctR}% da receita)</span></span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${i.color}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Status pedidos
+  const statusMap = {};
+  state.pedidos.forEach(p => { statusMap[p.statusPedido] = (statusMap[p.statusPedido]||0)+1; });
+  const sp = document.getElementById('d-status-pedidos');
+  sp.innerHTML = Object.entries(statusMap).map(([s,n]) =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span>${statusPedidoBadge(s)}</span>
+      <span style="font-weight:600;font-size:15px">${n}</span>
+    </div>`
+  ).join('');
+
+  // Estoque alertas
+  const zerados = state.estoque.filter(e => e.qtd === 0);
+  const baixos = state.estoque.filter(e => e.qtd > 0 && e.qtd < e.min);
+  const ea = document.getElementById('d-estoque-alertas');
+  if (zerados.length === 0 && baixos.length === 0) {
+    ea.innerHTML = '<div style="color:var(--green);font-weight:500;padding:12px 0">✅ Todos os itens acima do mínimo</div>';
+  } else {
+    ea.innerHTML = [
+      ...zerados.map(e => `<div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span>🔴 ${e.produto} <span style="color:var(--gray);font-size:11px">${e.spec}</span></span><span class="badge badge-red">Zerado</span></div>`),
+      ...baixos.map(e => `<div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span>🟡 ${e.produto} <span style="color:var(--gray);font-size:11px">${e.spec}</span></span><span class="badge badge-yellow">${e.qtd}/${e.min}</span></div>`)
+    ].join('');
+  }
+}
+
+// ============================================================
+// RENDER FINANCEIRO
+// ============================================================
+// Global input styles for editable tables
+const inStyle = 'border:1px solid #E5E7EB;border-radius:7px;padding:6px 8px;font-size:12px;color:#1A1A2E;background:white;width:100%;min-height:32px';
+const selStyle = inStyle + ';cursor:pointer';
+
+let varFiltro = 'todos';
+function setFilterVar(f) {
+  varFiltro = f;
+  document.querySelectorAll('[id^="vchip-"]').forEach(c => c.classList.remove('active'));
+  document.getElementById('vchip-'+f).classList.add('active');
+  renderFinanceiro();
+}
+
+function renderFinanceiro() {
+  const { fixoMes, fixoTotal, varTotal, invTotal } = calcTotais();
+  document.getElementById('f-receita').textContent = fmt(calcReceita());
+  document.getElementById('f-fixos').textContent = fmt(fixoTotal);
+  document.getElementById('f-variaveis').textContent = fmt(varTotal);
+  document.getElementById('f-invest').textContent = fmt(invTotal);
+
+  // Fixos
+  const tf = document.getElementById('tbody-fixos');
+  tf.innerHTML = state.fixos.map((f,i) => {
+    const pagoBadge = f.pago && f.pago !== 'PINK' ? `<span class="badge ${f.pago==='Roberta'?'badge-yellow':'badge-navy'}">${f.pago}</span>` : '<span class="badge badge-gray">PINK</span>';
+    const rowCls = f.pago === 'Roberta' ? 'row-roberta' : f.pago === 'Agnes' ? 'row-agnes' : '';
+    return `<tr class="${rowCls}">
+    <td>${f.nome}</td>
+    <td style="font-weight:600">${fmt(f.valor)}</td>
+    <td>${f.venc||'—'}</td>
+    <td style="color:var(--gray);font-size:12px">${f.obs||''}</td>
+    <td>${pagoBadge}</td>
+    <td><button class="btn btn-outline btn-sm" onclick="removeFixo(${i})">×</button></td>
+  </tr>`;}).join('');
+  document.getElementById('total-fixos-mes').textContent = fmt(fixoMes) + '/mês → ' + fmt(fixoMes*MESES) + ' (3 meses)';
+
+  // Variáveis
+  const varFiltered = varFiltro === 'todos' ? state.variaveis : state.variaveis.filter(v => (v.classif||'Insumo') === varFiltro);
+  const tv = document.getElementById('tbody-variaveis');
+  tv.innerHTML = varFiltered.map((v,i) => { const idx = state.variaveis.indexOf(v);
+    const reembolsadoTag = v.reembolsado ? ' <span class="badge badge-green" style="font-size:10px">✓ Reembolsado</span>' : '';
+    const pagoBadge = v.pago && v.pago !== 'PINK' ? `<span class="badge ${v.pago==='Roberta'?'badge-yellow':'badge-navy'}">${v.pago}</span>${reembolsadoTag}` : '<span class="badge badge-gray">PINK</span>';
+    const rowCls = v.pago === 'Roberta' ? 'row-roberta' : v.pago === 'Agnes' ? 'row-agnes' : '';
+    return `<tr class="${rowCls}">
+    <td>${v.nome}</td>
+    <td><span class="badge badge-gray">${v.forn}</span></td>
+    <td>${fmtDate(v.data)}</td>
+    <td>${v.qtd} ${v.un}</td>
+    <td>${fmt(v.unit)}</td>
+    <td style="font-weight:600">${fmt(v.total)}</td>
+    <td><span class="badge ${v.classif==='Embalagem'?'badge-navy':v.classif==='Outros'?'badge-gray':v.classif==='Manutenção'?'badge-yellow':v.classif==='Marketing'?'badge-green':v.classif==='Serviço'?'badge-pink':'badge-pink'}">${v.classif||'Insumo'}</span></td>
+    <td>${pagoBadge}</td>
+    <td><button class="btn btn-outline btn-sm" onclick="removeVar(${idx})">×</button></td>
+  </tr>`;}).join('');
+  document.getElementById('total-variaveis').textContent = fmt(varTotal);
+
+  // Investimentos
+  const ti = document.getElementById('tbody-invest');
+  // Reembolso summary
+  const todos = [...state.fixos.map(f=>({val:f.valor*3,pago:f.pago,reembolsado:f.reembolsado})), ...state.variaveis.map(v=>({val:v.total,pago:v.pago,reembolsado:v.reembolsado})), ...state.investimentos.map(v=>({val:v.valor,pago:v.pago,reembolsado:v.reembolsado}))];
+  const reemb = {};
+  todos.forEach(({val,pago,reembolsado}) => { if(pago && pago!=='PINK' && !reembolsado) reemb[pago] = (reemb[pago]||0)+val; });
+  const rs = document.getElementById('reembolso-summary');
+  if (rs) {
+    if (Object.keys(reemb).length === 0) {
+      rs.innerHTML = '<span style="color:var(--green);font-weight:500">✅ Nenhum reembolso pendente</span>';
+    } else {
+      rs.innerHTML = Object.entries(reemb).map(([nome,val]) =>
+        `<div style="background:${nome==='Roberta'?'#FEF3C7':'#EEF2FF'};border-radius:12px;padding:16px 24px;text-align:center">
+          <div style="font-size:12px;font-weight:600;color:var(--gray);margin-bottom:4px">A reembolsar — ${nome}</div>
+          <div style="font-size:24px;font-weight:700;color:var(--navy)">${fmt(val)}</div>
+        </div>`
+      ).join('');
+    }
+  }
+
+  ti.innerHTML = state.investimentos.map((v,i) => {
+    const reembolsadoTag = v.reembolsado ? ' <span class="badge badge-green" style="font-size:10px">✓ Reembolsado</span>' : '';
+    const pagoBadge = v.pago && v.pago !== 'PINK' ? `<span class="badge ${v.pago==='Roberta'?'badge-yellow':'badge-navy'}">${v.pago}</span>${reembolsadoTag}` : '<span class="badge badge-gray">PINK</span>';
+    const rowCls = v.pago === 'Roberta' ? 'row-roberta' : v.pago === 'Agnes' ? 'row-agnes' : '';
+    return `<tr class="${rowCls}">
+    <td>${v.nome}</td>
+    <td>${fmtDate(v.data)}</td>
+    <td>${v.pgto}</td>
+    <td style="font-weight:600">${fmt(v.valor)}</td>
+    <td>${pagoBadge}</td>
+    <td><button class="btn btn-outline btn-sm" onclick="removeInvest(${i})">×</button></td>
+  </tr>`;}).join('');
+}
+
+// ============================================================
+// RENDER PEDIDOS
+// ============================================================
+let pedidoFiltro = 'todos';
+function setFilter(f) {
+  pedidoFiltro = f;
+  document.querySelectorAll('[id^="chip-"]').forEach(c => c.classList.remove('active'));
+  document.getElementById('chip-'+f).classList.add('active');
+  renderPedidos();
+}
+
+function renderPedidos() {
+  const q = document.getElementById('search-pedidos').value.toLowerCase();
+  let pedidos = state.pedidos.filter(p => {
+    const match = !q || p.cliente.toLowerCase().includes(q) || p.produtos.toLowerCase().includes(q);
+    if (!match) return false;
+    if (pedidoFiltro === 'urgente') return isUrgente(p.entrega) && p.statusPedido !== 'Entregue';
+    if (pedidoFiltro === 'producao') return p.statusPedido === 'Em produção';
+    if (pedidoFiltro === 'pendente') return ['Pagt Pendente','Pagt Parcial 50%'].includes(p.statusPgto);
+    if (pedidoFiltro === 'entregue') return p.statusPedido === 'Entregue';
+    return true;
+  });
+
+  const pagos = state.pedidos.filter(p => p.statusPgto === 'Pago').length;
+  const pendentes = state.pedidos.filter(p => ['Pagt Pendente','Pagt Parcial 50%'].includes(p.statusPgto)).length;
+  document.getElementById('p-total').textContent = state.pedidos.length;
+  document.getElementById('p-pagos').textContent = pagos;
+  document.getElementById('p-pendentes').textContent = pendentes;
+  document.getElementById('p-areceber').textContent = fmt(calcAReceber());
+
+  const tb = document.getElementById('tbody-pedidos');
+  if (pedidos.length === 0) {
+    tb.innerHTML = '<tr><td colspan="12"><div class="empty"><div class="empty-icon">📭</div><div class="empty-text">Nenhum pedido encontrado</div></div></td></tr>';
+    return;
+  }
+  const inS = 'border:1px solid #E5E7EB;border-radius:7px;padding:4px 7px;font-size:12px;color:#1A1A2E;background:white;width:100%';
+  const selS = inS + ';cursor:pointer';
+  const periodos = ['junho/2026','julho/2026','agosto/2026','setembro/2026'];
+  const pgtoOpts = ['Pago','Pagt Parcial 50%','Pagt Pendente','Em negociação','Sem info'];
+  const pedOpts  = ['Não iniciado','Em produção','Entregue','Enviado','Retirada'];
+  const entOpts  = ['Entrega Própria','Motoboy','Correios','Retirada','A definir','Sem info'];
+
+  function mkSel(opts, val, ri, field, extra) {
+    const os = opts.map(o => '<option value="'+o+'"'+(val===o?' selected':'')+'>'+( o||'—')+'</option>').join('');
+    const cb = extra ? 'editPedido('+ri+','+JSON.stringify(field)+',this.value);'+extra : 'editPedido('+ri+','+JSON.stringify(field)+',this.value)';
+    return '<select style="'+selS+'" onchange="'+cb+'">' + os + '</select>';
+  }
+  function mkInput(type, val, ri, field, extra, w) {
+    const cb = extra ? 'editPedido('+ri+','+JSON.stringify(field)+(type==='number'?',+this.value':',this.value')+');'+extra : 'editPedido('+ri+','+JSON.stringify(field)+(type==='number'?',+this.value':',this.value')+')';
+    const st = inS + (w ? ';width:'+w : '');
+    if (type === 'number' && (field === 'valor' || field === 'restante' || field === 'frete')) {
+      const displayVal = val ? Number(val).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}) : '0,00';
+      return '<input type="text" style="'+st+'" value="R$ '+displayVal+'" onfocus="this.value=parseFloat(this.value.replace(/[^0-9,]/g,\'\').replace(\',\',\'.\'))||0;this.type=\'number\';this.step=\'0.01\'" onblur="this.type=\'text\';this.value=\'R$ \'+Number(this.value||0).toLocaleString(\'pt-BR\',{minimumFractionDigits:2,maximumFractionDigits:2})" onchange="'+cb+'">';
+    }
+    return '<input type="'+type+'"'+(type==='number'?' step="0.01"':'')+' style="'+st+'" value="'+String(val||'').replace(/"/g,'&quot;')+'" onchange="'+cb+'">';
+  }
+
+  tb.innerHTML = pedidos.map((p) => {
+    const ri = state.pedidos.indexOf(p);
+    const urgente = isUrgente(p.entrega) && p.statusPedido !== 'Entregue';
+    const bg = urgente ? 'background:var(--red-light)' : '';
+    return '<tr style="'+bg+'">'
+      + '<td>' + mkSel(periodos, p.periodo, ri, 'periodo', '') + '</td>'
+      + '<td style="min-width:130px">' + mkInput('text', p.cliente, ri, 'cliente', '', '') + (urgente ? ' <span style="color:red;font-size:11px">🔴</span>' : '') + '</td>'
+      + '<td style="min-width:160px"><textarea style="border:1px solid #E5E7EB;border-radius:7px;padding:6px 8px;font-size:12px;color:#1A1A2E;background:white;width:100%;min-height:60px;resize:vertical;font-family:var(--font-body)" onchange="editPedido('+ri+','+JSON.stringify('produtos')+',this.value)">'+(p.produtos||'')+'</textarea></td>'
+      + '<td>' + mkInput('number', p.qtd, ri, 'qtd', '', '55px') + '</td>'
+      + '<td>' + mkInput('number', p.valor, ri, 'valor', 'renderDashboard()', '90px') + '</td>'
+      + '<td>' + mkInput('number', p.restante, ri, 'restante', 'renderDashboard()', '90px') + '</td>'
+      + '<td>' + mkSel(pgtoOpts, p.statusPgto, ri, 'statusPgto', 'renderPedidos()') + '</td>'
+      + '<td>' + mkInput('date', p.entrega, ri, 'entrega', 'renderPedidos()', '') + '</td>'
+      + '<td>' + mkSel(pedOpts, p.statusPedido, ri, 'statusPedido', 'renderPedidos()') + '</td>'
+      + '<td>' + mkSel(entOpts, p.entregaForma, ri, 'entregaForma', '') + '</td>'
+      + '<td>' + mkInput('number', p.frete, ri, 'frete', '', '70px') + '</td>'
+      + '<td style="min-width:180px;max-width:260px"><textarea style="'+inStyle+';resize:vertical;min-height:60px;font-family:var(--font-body)" placeholder="Observações..." onchange="editPedido('+ri+','+JSON.stringify('obs')+',this.value)">'+(p.obs||'')+'</textarea></td>'
+      + '<td><button class="btn btn-outline btn-sm" onclick="removePedido('+ri+')">×</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function editPedido(idx, field, value) {
+  state.pedidos[idx][field] = value;
+  autoSave('pedidos');
+}
+
+// ============================================================
+// RENDER ESTOQUE
+// ============================================================
+let estFiltro = 'todos';
+function setFilterEstoque(f) {
+  estFiltro = f;
+  document.querySelectorAll('[id^="est-"]').forEach(c => c.classList.remove('active'));
+  document.getElementById('est-'+f).classList.add('active');
+  renderEstoque();
+}
+
+function renderEstoque() {
+  const q = document.getElementById('search-estoque').value.toLowerCase();
+  let items = state.estoque.filter(e => {
+    const match = !q || e.produto.toLowerCase().includes(q) || e.spec.toLowerCase().includes(q) || e.sku.toLowerCase().includes(q) || e.cat.toLowerCase().includes(q);
+    if (!match) return false;
+    if (estFiltro === 'zerado') return e.qtd === 0;
+    if (estFiltro === 'baixo') return e.qtd > 0 && e.qtd < e.min;
+    if (estFiltro === 'ok') return e.qtd >= e.min;
+    return true;
+  });
+
+  const tb = document.getElementById('tbody-estoque');
+  if (items.length === 0) {
+    tb.innerHTML = `<tr><td colspan="11"><div class="empty"><div class="empty-icon">📦</div><div class="empty-text">Nenhum item encontrado</div></div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = items.map((e, idx) => {
+    const status = e.qtd === 0 ? '<span class="badge badge-red">🔴 Zerado</span>' :
+                   e.qtd < e.min ? '<span class="badge badge-yellow">🟡 Baixo</span>' :
+                   '<span class="badge badge-green">🟢 OK</span>';
+    const ri = state.estoque.indexOf(e);
+    return `<tr>
+      <td style="font-size:11px;color:var(--gray)">${e.sku}</td>
+      <td style="font-size:12px">${e.cat}</td>
+      <td style="font-weight:500">${e.produto}</td>
+      <td style="font-size:12px;color:var(--gray)">${e.spec}</td>
+      <td>
+        <input type="number" value="${e.qtd}" min="0" style="width:65px;padding:4px 6px;font-size:13px"
+          onchange="state.estoque[${ri}].qtd=+this.value;renderDashboard()">
+      </td>
+      <td style="color:var(--gray);font-size:13px">${e.min}</td>
+      <td style="font-size:12px;color:var(--gray)">${e.un}</td>
+      <td>${e.custo ? fmt(e.custo) : '<span style="color:var(--gray)">—</span>'}</td>
+      <td style="font-size:12px">${e.forn||'—'}</td>
+      <td>${status}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="state.estoque.splice(${ri},1);renderEstoque();renderDashboard()">×</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+// ADD / REMOVE
+// ============================================================
+function addFixo() {
+  const nome = document.getElementById('fixo-nome').value.trim();
+  const valor = parseFloat(document.getElementById('fixo-valor').value);
+  if (!nome || !valor) return alert('Preencha nome e valor.');
+  state.fixos.push({ nome, valor, venc: document.getElementById('fixo-venc').value, obs: document.getElementById('fixo-obs').value, pago: document.getElementById('fixo-pago').value });
+  closeModal('modal-add-fixo');
+  autoSave('fixos');
+  renderFinanceiro(); renderDashboard();
+}
+
+function addVariavel() {
+  const nome = document.getElementById('var-nome').value.trim();
+  const total = parseFloat(document.getElementById('var-total').value);
+  const qtd = parseFloat(document.getElementById('var-qtd').value) || 1;
+  if (!nome || !total) return alert('Preencha nome e valor total.');
+  state.variaveis.push({ nome, forn: document.getElementById('var-forn').value, data: document.getElementById('var-data').value, qtd, un: document.getElementById('var-un').value, total, unit: total/qtd, classif: document.getElementById('var-classif').value, pago: document.getElementById('var-pago').value });
+  closeModal('modal-add-variavel');
+  autoSave('variaveis');
+  renderFinanceiro(); renderDashboard();
+}
+
+function addInvest() {
+  const nome = document.getElementById('inv-nome').value.trim();
+  const valor = parseFloat(document.getElementById('inv-valor').value);
+  if (!nome || !valor) return alert('Preencha nome e valor.');
+  state.investimentos.push({ nome, data: document.getElementById('inv-data').value, pgto: document.getElementById('inv-pgto').value, valor, pago: document.getElementById('inv-pago').value });
+  closeModal('modal-add-invest');
+  autoSave('investimentos');
+  renderFinanceiro(); renderDashboard();
+}
+
+function addPedido() {
+  const cliente = document.getElementById('ped-cliente').value.trim();
+  if (!cliente) return alert('Informe o nome do cliente.');
+  state.pedidos.unshift({
+    periodo: document.getElementById('ped-periodo').value,
+    cliente, tel: document.getElementById('ped-tel').value,
+    produtos: document.getElementById('ped-produtos').value,
+    qtd: +document.getElementById('ped-qtd').value || 1,
+    valor: parseFloat(document.getElementById('ped-valor').value) || 0,
+    restante: parseFloat(document.getElementById('ped-restante').value) || 0,
+    pgto: document.getElementById('ped-pgto').value,
+    statusPgto: document.getElementById('ped-status-pgto').value,
+    entrega: document.getElementById('ped-entrega').value,
+    entregaForma: document.getElementById('ped-entrega-forma').value,
+    frete: parseFloat(document.getElementById('ped-frete').value) || 0,
+    statusPedido: document.getElementById('ped-status').value,
+    obs: document.getElementById('ped-obs').value,
+  });
+  closeModal('modal-add-pedido');
+  autoSave('pedidos');
+  renderPedidos(); renderDashboard();
+}
+
+function addEstoque() {
+  const produto = document.getElementById('est-produto').value.trim();
+  if (!produto) return alert('Informe o produto.');
+  state.estoque.push({
+    sku: document.getElementById('est-sku').value,
+    cat: document.getElementById('est-cat').value,
+    produto, spec: document.getElementById('est-spec').value,
+    un: document.getElementById('est-un').value,
+    qtd: +document.getElementById('est-qtd').value || 0,
+    min: +document.getElementById('est-min').value || 0,
+    custo: parseFloat(document.getElementById('est-custo').value) || 0,
+    forn: document.getElementById('est-forn').value,
+    loc: document.getElementById('est-loc').value,
+    obs: document.getElementById('est-obs').value,
+  });
+  closeModal('modal-add-estoque');
+  autoSave('estoque');
+  renderEstoque(); renderDashboard();
+}
+
+function removeFixo(i) { if(confirm('Remover?')) { state.fixos.splice(i,1); autoSave('fixos'); renderFinanceiro(); renderDashboard(); } }
+function removeVar(i) { if(confirm('Remover?')) { state.variaveis.splice(i,1); autoSave('variaveis'); renderFinanceiro(); renderDashboard(); } }
+function removeInvest(i) { if(confirm('Remover?')) { state.investimentos.splice(i,1); autoSave('investimentos'); renderFinanceiro(); renderDashboard(); } }
+function removePedido(i) { if(confirm('Remover?')) { state.pedidos.splice(i,1); autoSave('pedidos'); renderPedidos(); renderDashboard(); } }
+
+function calcVarUnit() {
+  const total = parseFloat(document.getElementById('var-total').value)||0;
+  const qtd = parseFloat(document.getElementById('var-qtd').value)||1;
+  document.getElementById('var-unit').value = qtd ? fmt(total/qtd) : '';
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'financeiro') renderFinanceiro();
+  if (id === 'pedidos') renderPedidos();
+  if (id === 'estoque') renderEstoque();
+  if (id === 'catalogo') renderCatalogo();
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
+
+
+// ============================================================
+// CATÁLOGO DATA
+// ============================================================
+state.catalogo = [
+  // CAIXAS
+  { cat:'Caixas', nome:'Cesta', desc:'Média — com alças de couro', venda:68, custo:0 },
+  { cat:'Caixas', nome:'Cesta', desc:'Grande — com alças de couro', venda:75, custo:0 },
+  { cat:'Caixas', nome:'Caixa A5', desc:'24,5×18,8×7,0cm', venda:85, custo:0 },
+  { cat:'Caixas', nome:'Maleta A5', desc:'24,5×18,8×7,0cm', venda:98, custo:0 },
+  { cat:'Caixas', nome:'Caixa Bandeja', desc:'Tampa bi-partida, vira bandeja com pés', venda:155, custo:0 },
+  { cat:'Caixas', nome:'Maleta com Ferragens', desc:'Cantos arredondados, ferragens douradas — O Diamante 2026', venda:200, custo:0 },
+  { cat:'Caixas', nome:'EcoBag', desc:'100% algodão, 35×45cm', venda:60, custo:0 },
+  // PAPELARIA
+  { cat:'Papelaria', nome:'Caderno A5', desc:'Capa dura, 80fls — Folhas Lisas', venda:60, custo:0 },
+  { cat:'Papelaria', nome:'Caderno A5', desc:'Capa dura, 80fls — Folhas Pautadas Personalizadas', venda:75, custo:0 },
+  { cat:'Papelaria', nome:'Caderno Universitário', desc:'Capa dura 18×21,5cm — 80 Folhas Personalizadas', venda:90, custo:0 },
+  { cat:'Papelaria', nome:'Caderno Universitário', desc:'Capa dura 18×21,5cm — 120 Folhas Personalizadas', venda:125, custo:0 },
+  { cat:'Papelaria', nome:'Planner 2027 A5', desc:'Planner completo A5', venda:92, custo:0 },
+  { cat:'Papelaria', nome:'Agenda 2027 A5', desc:'1 dia por página (sáb/dom juntos)', venda:98, custo:0 },
+  { cat:'Papelaria', nome:'Agenda 2027 A5', desc:'2 dias por página', venda:88, custo:0 },
+  { cat:'Papelaria', nome:'Agenda Vertical', desc:'11×21,5cm — 1 dia por página', venda:95, custo:0 },
+  { cat:'Papelaria', nome:'Bloco A6', desc:'', venda:0, custo:0 },
+  { cat:'Papelaria', nome:'Brochurinha', desc:'Avulsa — Liso, Pontilhado, Quadriculado ou Pautado', venda:29, custo:0 },
+  { cat:'Papelaria', nome:'Brochurinha', desc:'Planner Trimestral — kit 4 brochuras', venda:100, custo:0 },
+  { cat:'Papelaria', nome:'Planejador de Aulas A5', desc:'Para professores', venda:68, custo:0 },
+  { cat:'Papelaria', nome:'Planner do Professor A5', desc:'Vida escolar completa', venda:95, custo:0 },
+  { cat:'Papelaria', nome:'Minha Semana Organizada', desc:'Planner A5 visão semanal', venda:70, custo:0 },
+  { cat:'Papelaria', nome:'Agenda A6', desc:'Bolso — 1 dia por página', venda:60, custo:0 },
+  { cat:'Papelaria', nome:'Agenda A6', desc:'Bolso — 2 dias por página', venda:55, custo:0 },
+  { cat:'Papelaria', nome:'Bloco A7', desc:'Personalizado', venda:18, custo:0 },
+  // DIVERSOS
+  { cat:'Diversos', nome:'Caneca Personalizada', desc:'Sem embalagem', venda:40, custo:9.76 },
+  { cat:'Diversos', nome:'Caneca Personalizada', desc:'Com embalagem', venda:44, custo:9.76 },
+  { cat:'Diversos', nome:'Squeeze em Alumínio', desc:'', venda:65, custo:0 },
+  { cat:'Diversos', nome:'Marca Páginas', desc:'Com tassel e ilhós dourado', venda:18, custo:0 },
+  { cat:'Diversos', nome:'Caneta Esferográfica', desc:'Personalizada', venda:16, custo:0 },
+  { cat:'Diversos', nome:'Estojo', desc:'', venda:40, custo:0 },
+  { cat:'Diversos', nome:'Botton-Clip', desc:'Vendido em dupla', venda:20, custo:0 },
+  { cat:'Diversos', nome:'Pratinho de Porcelana', desc:'', venda:39, custo:0 },
+];
+
+// ============================================================
+// RENDER CATÁLOGO
+// ============================================================
+let catFiltro = 'todos';
+function setFilterCat(f) {
+  catFiltro = f;
+  document.querySelectorAll('[id^="cat-"][id!="cat-total"][id!="cat-margem"][id!="cat-semcusto"][id!="cat-ticket"]').forEach(c => c.classList.remove('active'));
+  document.getElementById('cat-'+f).classList.add('active');
+  renderCatalogo();
+}
+
+function renderCatalogo() {
+  const q = document.getElementById('search-catalogo').value.toLowerCase();
+  let items = state.catalogo.filter(p => {
+    const match = !q || p.nome.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q) || p.cat.toLowerCase().includes(q);
+    if (!match) return false;
+    if (catFiltro !== 'todos') return p.cat === catFiltro;
+    return true;
+  });
+
+  const comCusto = state.catalogo.filter(p => p.custo > 0 && p.venda > 0);
+  const margemMedia = comCusto.length > 0 ? comCusto.reduce((a,p) => a + (p.venda-p.custo)/p.venda, 0) / comCusto.length : 0;
+  const semCusto = state.catalogo.filter(p => p.custo === 0).length;
+  const vendas = state.catalogo.filter(p => p.venda > 0);
+  const ticketMedio = vendas.length > 0 ? vendas.reduce((a,p) => a+p.venda, 0) / vendas.length : 0;
+
+  document.getElementById('cat-total').textContent = state.catalogo.length;
+  document.getElementById('cat-margem').textContent = comCusto.length > 0 ? (margemMedia*100).toFixed(1)+'%' : '—';
+  document.getElementById('cat-semcusto').textContent = semCusto;
+  document.getElementById('cat-ticket').textContent = ticketMedio > 0 ? fmt(ticketMedio) : '—';
+
+  const tb = document.getElementById('tbody-catalogo');
+  if (items.length === 0) {
+    tb.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Nenhum produto encontrado</div></div></td></tr>';
+    return;
+  }
+
+  tb.innerHTML = items.map(p => {
+    const ri = state.catalogo.indexOf(p);
+    const margem = p.venda > 0 && p.custo > 0 ? ((p.venda - p.custo) / p.venda) : null;
+    const lucro = p.venda > 0 && p.custo > 0 ? p.venda - p.custo : null;
+    let margemBadge = '<span style="color:var(--gray);font-size:12px">—</span>';
+    if (margem !== null) {
+      const cor = margem >= 0.6 ? 'var(--green)' : margem >= 0.4 ? 'var(--yellow)' : 'var(--red)';
+      margemBadge = '<span style="font-weight:700;color:'+cor+'">'+(margem*100).toFixed(1)+'%</span>';
+    }
+    const venCb = 'editProduto('+ri+','+JSON.stringify('venda')+',+this.value);renderCatalogo()';
+    const cstCb = 'editProduto('+ri+','+JSON.stringify('custo')+',+this.value);renderCatalogo()';
+    return '<tr>'
+      + '<td><span class="badge badge-navy">'+p.cat+'</span></td>'
+      + '<td style="font-weight:500">'+p.nome+'</td>'
+      + '<td style="font-size:12px;color:var(--gray)">'+p.desc+'</td>'
+      + '<td><input type="number" step="0.01" style="'+inStyle+';width:90px" value="'+p.venda+'" onchange="'+venCb+'"></td>'
+      + '<td><input type="number" step="0.01" style="'+inStyle+';width:90px" value="'+(p.custo||'')+'" placeholder="a preencher" onchange="'+cstCb+'"></td>'
+      + '<td>'+margemBadge+'</td>'
+      + '<td style="font-weight:600;color:var(--green)">'+(lucro !== null ? fmt(lucro) : '<span style="color:var(--gray)">—</span>')+'</td>'
+      + '<td><button class="btn btn-outline btn-sm" onclick="state.catalogo.splice('+ri+',1);renderCatalogo()">×</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function editProduto(idx, field, value) {
+  state.catalogo[idx][field] = value;
+  autoSave('catalogo');
+}
+
+function addProduto() {
+  const nome = document.getElementById('prod-nome').value.trim();
+  if (!nome) return alert('Informe o nome do produto.');
+  state.catalogo.push({
+    cat: document.getElementById('prod-cat').value,
+    nome,
+    desc: document.getElementById('prod-desc').value,
+    venda: parseFloat(document.getElementById('prod-venda').value) || 0,
+    custo: parseFloat(document.getElementById('prod-custo').value) || 0,
+  });
+  closeModal('modal-add-produto');
+  renderCatalogo();
+}
+
+// INIT
+renderDashboard();
+loadFromSheets();
+</script>
+</body>
+</html>
